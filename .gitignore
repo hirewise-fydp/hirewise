@@ -1,0 +1,42 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# dotenv environment files
+.env
+.env.*
+
+# Temporary files and directories
+tmp/
+temp/
+
+# System files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Backend specific
+/backend/node_modules/
+backend/*.log
+
+# Build output
+/frontend/dist/
+frontend/node_modules/
+frontend/.vite/
+
+# Testing
+coverage/
+*.lcov
+
+# Git-specific
+*.lock
+*.bak
