@@ -1,0 +1,11 @@
+.full-width-header {
+    width: 100%;
+    position: fixed; /* Keeps it at the top */
+    top: 0;
+    z-index: 1030; /* Ensures it stays above other content */
+  }
+  
+  body {
+    margin-top: 56px; /* Adjust to match the height of the header */
+  }
+  
