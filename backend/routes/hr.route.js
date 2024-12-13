@@ -1,12 +1,13 @@
 import express from 'express';
-import { createForm, createJD, fetchAllJobDescriptions } from '../controllers/hr.controller.js';
+import { createForm, createJD, fetchAllJobDescriptions, processJd } from '../controllers/hr.controller.js';
+import { upload } from '../middlewares/multer.middleware.js';
 
 const router = express.Router();
 
 // Define route handlers
 router.get('/create-form', createForm);
 router.get('/create-jd', createJD);
-// router.get('/get-all', fetchAllJobDescriptions)
+router.post('/process-jd', upload.single('image'), processJd);
 
 
 

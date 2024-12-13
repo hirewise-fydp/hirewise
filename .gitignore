@@ -40,3 +40,6 @@ coverage/
 # Git-specific
 *.lock
 *.bak
+
+
+python/secret.json
