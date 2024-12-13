@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js"
+  
   },
   "keywords": [],
   "author": "",
@@ -15,7 +17,9 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.21.1",
+    "mongoose": "^8.8.4",
     "path": "^0.12.7",
     "uuid": "^11.0.3"
   }
