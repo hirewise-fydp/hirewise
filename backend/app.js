@@ -1,10 +1,10 @@
 import express from 'express';
 import connectDB from './config/config.js';
-import dotenv from 'dotenv';
 import cors from 'cors'
 import cookieParser from 'cookie-parser'; //apne server se user ke browser ki cookies access kar paon or unpe crud lagasakoon
 import hrRoutes from './routes/hr.route.js';  // Import routes
 import userRoutes from "./routes/user.route.js"
+import dotenv from 'dotenv';
 dotenv.config(); 
 
 

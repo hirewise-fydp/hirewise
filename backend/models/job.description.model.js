@@ -5,38 +5,39 @@ const Schema = mongoose.Schema;
 const jobDescriptionSchema = new Schema({
   jobTitle: {
     type: String,
-    required: true
+    // required: true
   },
   jobSummary: {
     type: String,
-    required: true
+    // required: true
   },
   keyResponsibilities: {
     type: [String],
-    required: true
+    // required: true
   },
   qualifications: {
     education: {
       type: String, 
-      required: true
+      // required: true
     },
     experience: {
       type: String,
-      required: true
+      // required: true
     },
     skills: {
       type: [String],
-      required: true
+      // required: true
     }
   },
   location: {
     type: String,
-    required: true
+    // required: true
   },
   compensation: {
     salaryRange: {
       type: String, 
-      required: false
+      required: false,
+      default: ''
     },
     benefits: {
       type: [String], 
@@ -45,7 +46,7 @@ const jobDescriptionSchema = new Schema({
   },
   applicationProcess: {
     type: String,
-    required: true
+    // required: true
   }
 });
 
