@@ -30,6 +30,13 @@ app.use(express.json());
 
 // Define routes
 app.use('/api/v4/hr', hrRoutes);
+app.use((err, req, res, next) => {
+  console.error("Error:", err.message);
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "An unexpected error occurred";
+  res.status(statusCode).json({ message });
+});
+
 
 // Start the server
 const PORT = process.env.PORT || 5000;
