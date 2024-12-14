@@ -1,10 +1,51 @@
 import React, { useState } from "react";
-import "../../styles/auth.css"
+import "../../styles/auth.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Navigate, useNavigate } from "react-router-dom";
+const API_BASE_URL = "http://localhost:5000/api/user";
 
 const AuthComponent = () => {
   const [showSignup, setShowSignup] = useState(false);
+  const [error, setError] = useState();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "HR",
+  });
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+    console.log("formData:",formData)
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+        if (!showSignup) {
+          const response = await axios.post(`${API_BASE_URL}/login`, {
+            email: formData.email,
+            password: formData.password,
+          });
+          alert("Login Successful!");
+          navigate("/create-form")
+
+          console.log("response:", response);
+        } else {
+          const response = await axios.post(`${API_BASE_URL}/register`, formData);
+          alert("Signup Successful!");
+          console.log(response.data);
+        }
+      } catch (error) {
+        // Handle the error message appropriately
+        const errorMessage = error.response?.data?.message || "An error occurred";
+        setError(errorMessage)
+        console.error("Error:", errorMessage);
+      }
+  };
 
   return (
     <div className="container-fluid vw-100 vh-100 bg-light">
@@ -14,25 +55,57 @@ const AuthComponent = () => {
           // Login Form
           <div className=" vw-80 col-md-5 p-5 bg-white shadow rounded">
             <h3 className="text-center mb-4">
-              Hi, Welcome Back! <span role="img" aria-label="wave">👋</span>
+              Hi, Welcome Back!{" "}
+              <span role="img" aria-label="wave">
+                👋
+              </span>
             </h3>
             <form>
               <div className="mb-3">
                 <label className="form-label">Email</label>
-                <input type="email" className="form-control" placeholder="example@gmail.com" />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                  value={formData.email}
+                  className="form-control"
+                  onChange={handleChange}
+                  required
+                />
               </div>
               <div className="mb-3">
                 <label className="form-label">Password</label>
-                <input type="password" className="form-control" placeholder="Enter Your Password" />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  value={formData.password}
+                  className="form-control"
+                  onChange={handleChange}
+                  required
+                />
               </div>
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <div className="form-check">
-                  <input type="checkbox" className="form-check-input" id="rememberMe" />
-                  <label className="form-check-label" htmlFor="rememberMe">Remember Me</label>
+                  <input
+                    type="checkbox"
+                    className="form-check-input"
+                    id="rememberMe"
+                  />
+                  <label className="form-check-label" htmlFor="rememberMe">
+                    Remember Me
+                  </label>
                 </div>
-                <a href="#" className="text-danger">Forgot Password?</a>
+                <div className="text-danger">
+                    {error}
+                </div>
+                <a href="#" className="text-danger">
+                  Forgot Password?
+                </a>
               </div>
-              <button type="submit" className="btn btn-primary w-100 mb-3">Login</button>
+              <button  onClick={handleSubmit} type="submit" className="btn btn-primary w-100 mb-3">
+                Login
+              </button>
             </form>
             <div className="text-center">
               <p>
@@ -54,25 +127,64 @@ const AuthComponent = () => {
         ) : (
           // Sign Up Form
           <div className="row vw-80  vh-70 col-md-5 p-5 bg-white shadow rounded">
-            <h3 className="text-center mb-4">Connect with your friends today!</h3>
-            <form>
+            <h3 className="text-center mb-4">
+              Connect with your friends today!
+            </h3>
+            <form onSubmit={handleSubmit}>
               <div className="mb-3">
-                <label className="form-label">Username</label>
-                <input type="text" className="form-control" placeholder="Enter Your Username" />
+                <label className="form-label">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Name"
+                  value={formData.name}
+                  className="form-control"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Role</label>
+                <select
+                  name="role"
+                  value={formData.role}
+                  className="form-control"
+
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="HR">HR</option>
+                  <option value="Admin">Admin</option>
+                </select>
               </div>
               <div className="mb-3">
                 <label className="form-label">Email</label>
-                <input type="email" className="form-control" placeholder="Enter Your Email" />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Phone Number</label>
-                <input type="text" className="form-control" placeholder="Enter Your Phone Number" />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                  value={formData.email}
+                  className="form-control"
+
+                  onChange={handleChange}
+                  required
+                />
               </div>
               <div className="mb-3">
                 <label className="form-label">Password</label>
-                <input type="password" className="form-control" placeholder="Enter Your Password" />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  value={formData.password}
+                  className="form-control"
+                  onChange={handleChange}
+                  required
+                />
               </div>
-              <button type="submit" className="btn btn-primary w-100 mb-3">Sign Up</button>
+              <button type="submit" className="btn btn-primary w-100 mb-3">
+                Sign Up
+              </button>
             </form>
             <div className="text-center">
               <p>

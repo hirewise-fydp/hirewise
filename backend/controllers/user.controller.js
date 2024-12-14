@@ -36,32 +36,34 @@ const registerUser = asyncHandler(async (req, res) => {
     user: { id: user._id, name: user.name, email: user.email, role: user.role },
   });
 });
-
-const loginUser = asyncHandler(async (req, res) => {
+const loginUser = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
+
   if (!email || !password) {
-    throw new ApiError(400, "Email and password are required");
+    return next(new ApiError(400, "Email and password are required"));
   }
 
   const user = await User.findOne({ email });
-  console.log("user:",user)
+  console.log("user:", user);
   if (!user) {
-    throw new ApiError(404, "User not found");
+    return next(new ApiError(401, "User not found"));
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
-    throw new ApiError(401, "Invalid credentials");
-    res
-    .json({ message: "Login successful", user: { id: user._id, name: user.name, role: user.role } });
+    return next(new ApiError(401, "Invalid credentials"));
   }
-  console.log("user id :", user._id)
+
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
 
   res
     .cookie("accessToken", accessToken, { httpOnly: true, secure: true })
     .cookie("refreshToken", refreshToken, { httpOnly: true, secure: true })
-    .json({ message: "Login successful", user: { id: user._id, name: user.name, role: user.role } });
+    .json({
+      message: "Login successful",
+      user: { id: user._id, name: user.name, role: user.role },
+    });
 });
+
 
 export { registerUser, loginUser };
