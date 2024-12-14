@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 
 const formSchema = new Schema({
     jobId: { type: mongoose.Schema.Types.ObjectId, ref: 'JobDescription', required: true },
+    // jobId:{type:String,required:true},
     formData: [
         {
             label: { type: String, required: true },

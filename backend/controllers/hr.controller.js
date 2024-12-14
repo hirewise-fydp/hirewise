@@ -1,5 +1,6 @@
 import { JobDescription } from '../models/job.description.model.js';
-import FormData from 'form-data';
+import { Form } from '../models/form.model.js';
+
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -10,15 +11,17 @@ const __dirname = path.dirname(__filename);
 
 export const createForm = async (req, res) => {
   try {
+    console.log(req.body)
     const { jobId, formData } = req.body;
-    if (!jobId || !formData) {
-      return res.status(400).json({ error: 'Job ID and form data are required' });
-    }
-    const jobExists = await JobDescription.findById(jobId);
-    if (!jobExists) {
-      return res.status(404).json({ error: 'Job description not found' });
-    }
-    const newForm = await Form.create({ jobId, formData });
+    console.log("jobid",String(jobId))
+    // if (!jobId || !formData) {
+    //   return res.status(400).json({ error: 'Job ID and form data are required' });
+    // }
+    // const jobExists = await JobDescription.findById(jobId);
+    // if (!jobExists) {
+    //   return res.status(404).json({ error: 'Job description not found' });
+    // }
+    const newForm = await Form.create({jobId, formData} );
     res.status(201).json({ message: 'Form created', form: newForm });
   } catch (error) {
     res.status(500).json({ error: 'Failed to create form' });

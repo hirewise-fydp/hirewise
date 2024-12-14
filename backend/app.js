@@ -26,7 +26,6 @@ app.use(express.json())
 app.use("/api/user", userRoutes);
 
 // Middleware to parse JSON
-app.use(express.json());
 
 // Define routes
 app.use('/api/v4/hr', hrRoutes);

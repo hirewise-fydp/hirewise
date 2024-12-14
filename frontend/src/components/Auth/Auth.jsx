@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import "../../styles/auth.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 const API_BASE_URL = "http://localhost:5000/api/user";
 
 const AuthComponent = () => {
   const [showSignup, setShowSignup] = useState(false);
   const [error, setError] = useState();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -22,7 +23,6 @@ const AuthComponent = () => {
     console.log("formData:",formData)
   };
   const handleSubmit = async (e) => {
-    console.log("hewfewbw")
     e.preventDefault();
     try {
         if (!showSignup) {
@@ -31,6 +31,8 @@ const AuthComponent = () => {
             password: formData.password,
           });
           alert("Login Successful!");
+          navigate("/create-form")
+
           console.log("response:", response);
         } else {
           const response = await axios.post(`${API_BASE_URL}/register`, formData);
