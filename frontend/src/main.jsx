@@ -6,6 +6,7 @@ import CreateFormPage from "./views/Hr/CreateFormPage";
 import CandidatePage from "./views/Candidate/CandidatePage";
 import AuthComponent from "./components/Auth/Auth";
 import "./index.css";
+import CreateJobFormPage from "./views/Hr/CreateJobFormPage/CreateJobFormPage";
 
 const Main = () => {
   return (
@@ -13,6 +14,8 @@ const Main = () => {
       <Routes>
         <Route path="/" element={<AuthComponent />} />
         <Route path="/home" element={<App />} />
+        <Route path="/Create-job" element={<CreateJobFormPage />} />
+
         <Route path="/create-form" element={<CreateFormPage />} />
         <Route path="/apply-here" element={<CandidatePage />} />
       </Routes>
