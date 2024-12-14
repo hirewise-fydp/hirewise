@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import "../styles/auth.css"
+import "../../styles/auth.css"
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useNavigate } from "react-router-dom";
 
 const AuthComponent = () => {
-  const [showSignup, setShowSignup] = useState(false); // State to toggle between Login and Signup
+  const [showSignup, setShowSignup] = useState(false);
 
   return (
     <div className="container-fluid vw-100 vh-100 bg-light">

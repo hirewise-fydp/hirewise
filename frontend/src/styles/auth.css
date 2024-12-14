@@ -1,0 +1,33 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: auto;
+    box-sizing: border-box;
+  }
+  
+  .container-fluid {
+    background-color: #f8e1e1; /* Light pink background */
+  }
+  
+  .bg-white {
+    background-color: #ffffff;
+  }
+  
+  .shadow {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-control {
+    border-radius: 8px;
+    padding: 12px;
+  }
+  
+  .btn-primary, .btn-outline-primary {
+    border-radius: 8px;
+  }
+  
+  .btn i {
+    margin-right: 8px;
+  }
+  

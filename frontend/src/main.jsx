@@ -11,8 +11,8 @@ const Main = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<App />} />
         <Route path="/" element={<AuthComponent />} />
+        <Route path="/home" element={<App />} />
         <Route path="/create-form" element={<CreateFormPage />} />
         <Route path="/apply-here" element={<CandidatePage />} />
       </Routes>

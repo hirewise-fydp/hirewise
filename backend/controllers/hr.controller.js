@@ -1,4 +1,4 @@
-import { JobDescription } from '../models/job-description.js';
+import { JobDescription } from '../models/job.description.model.js';
 import FormData from 'form-data';
 import fs from 'fs';
 import path from 'path';
