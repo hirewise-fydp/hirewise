@@ -1,5 +1,5 @@
 import express from 'express';
-import { createForm, createJD, fetchAllJobDescriptions, processJd } from '../controllers/hr.controller.js';
+import { createJD, createJobDescription,createForm, processJd } from '../controllers/hr.controller.js';
 import { upload } from '../middlewares/multer.middleware.js';
 
 const router = express.Router();
@@ -7,6 +7,7 @@ const router = express.Router();
 // Define route handlers
 router.get('/create-form', createForm);
 router.get('/create-jd', createJD);
+router.post('/createjob', createJobDescription);
 router.post('/process-jd', upload.single('image'), processJd);
 
 
