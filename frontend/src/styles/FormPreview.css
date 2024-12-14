@@ -1,0 +1,20 @@
+.form-preview{
+    padding: 20px;
+    width: 65vw;
+    background-color: rgb(242, 242, 242);
+}
+.ant-tabs-nav {
+    
+    width: 100% !important;
+  }
+  
+  .ant-tabs-tab {
+    display: block !important; 
+    flex: 1;
+    text-align: center !important;
+  }
+  
+  .ant-tabs-nav > div:nth-of-type(1) {
+    display: unset !important;
+    width: 100% !important;
+  }
