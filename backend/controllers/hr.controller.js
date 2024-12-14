@@ -1,8 +1,6 @@
 import { JobDescription } from "../models/job.description.model.js";
 
-export const createForm = async (req, res) => {
-  console.log("FORM CREATED");
-};
+
 
 export const createJD = async (req, res) => {
   console.log("JD CREATED");
@@ -61,7 +59,7 @@ const processJobDescription = async (jobId) => {
 
 
 
-const createForm = async (req, res) => {
+export const createForm = async (req, res) => {
   try {
       const { jobId, formData } = req.body;
       if (!jobId || !formData) {
