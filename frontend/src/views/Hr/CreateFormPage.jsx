@@ -13,7 +13,21 @@ const initialFields = [
 
 const CreateFormPage = () => {
   const [fields, setFields] = useState(initialFields);
+  const [generatedLink, setGeneratedLink] = useState("");
+  const [isCopied, setIsCopied] = useState(false); // State to track button highlight
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+
   console.log("FIELDS", fields);
+
+  const copyToClipboard = () => {
+    navigator.clipboard
+      .writeText(generatedLink)
+      .then(() => {
+        setIsCopied(true); // Highlight the button
+        setTimeout(() => setIsCopied(false), 2000); // Remove highlight after 2 seconds
+      })
+      .catch((err) => console.error("Could not copy link", err));
+  };
 
   const addField = (type, label, options = []) => {
     const newField = {
@@ -48,17 +62,21 @@ const CreateFormPage = () => {
   const handleButtonClick = async (e) => {
     e.preventDefault();
     try {
-      console.log("cjheck 1 ")
-        
+      console.log("cjheck 1 ");
+
       const response = await axios.post(`${API_BASE_URL}/create-form`, {
         jobId: "675de11118b6462062cffc18",
         formData: fields,
       });
-        }
-        catch{
+      if (response) {
+        setIsButtonDisabled(true);
+        const formId = response.data.form._id;
+        setGeneratedLink(`http://localhost:5173/form/${formId}`);
+      }
 
-        }
-      };
+      const data = await response.json();
+    } catch {}
+  };
   return (
     <>
       <div className="FormPageHeroDiv">
@@ -70,10 +88,37 @@ const CreateFormPage = () => {
         />
       </div>
       <div className="text-center mt-4">
-        <button className="btn btn-primary" onClick={handleButtonClick}>
-          Submit Form
+        <button
+          className="btn btn-primary"
+          onClick={handleButtonClick}
+          disabled={isButtonDisabled} // Disable condition
+        >
+          {isButtonDisabled ? "Submitted" : "Submit Form"}
         </button>
       </div>
+      {generatedLink && (
+        <div className="alert alert-success mt-3 text-center">
+          <h5>Form Link:</h5>
+          <div className="d-flex justify-content-center align-items-center">
+            <a
+              href={generatedLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="me-2"
+            >
+              {generatedLink}
+            </a>
+            <button
+              onClick={copyToClipboard}
+              className={`btn btn-sm ${
+                isCopied ? "btn-success" : "btn-primary"
+              }`}
+            >
+              {isCopied ? "Copied" : "Copy"}
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 };

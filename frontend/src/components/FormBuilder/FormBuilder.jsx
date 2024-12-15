@@ -85,6 +85,7 @@ const FormBuilder = ({ addField }) => {
           type="primary"
           onClick={handleAddField}
           style={{ marginTop: '20px' }}
+          disabled={label==''}
         >
           Add Custom Field
         </Button>

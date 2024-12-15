@@ -43,22 +43,22 @@ export const fetchAllJobDescriptions = async () => {
   }
 };
 
-// export const createJobDescription = async (req, res) => {
-//   try {
-//     const { title } = req.body;
-//     if (!title) {
-//       return res.status(400).json({ error: 'Job title is required' });
-//     }
-//     const newJobDescription = await JobDescription.create({ title });
-//     processJobDescription(newJobDescription._id); // Pass to JD processing
-//     res.status(201).json({
-//       message: 'Job description created',
-//       jobDescription: newJobDescription,
-//     });
-//   } catch (error) {
-//     res.status(500).json({ error: 'Failed to create job description' });
-//   }
-// };
+export const createJobDescription = async (req, res) => {
+  try {
+    const { title } = req.body;
+    if (!title) {
+      return res.status(400).json({ error: 'Job title is required' });
+    }
+    const newJobDescription = await JobDescription.create({ title });
+    processJobDescription(newJobDescription._id); // Pass to JD processing
+    res.status(201).json({
+      message: 'Job description created',
+      jobDescription: newJobDescription,
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create job description' });
+  }
+};
 
 
 
