@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import FormBuilder from "../../components/FormBuilder/FormBuilder";
 import FormPreview from "../../components/FormBuilder/FormPreview";
-import axios from "axios";
 import "../../styles/createForm.css";
+import axiosInstance from "../../axios/AxiosInstance";
 const API_BASE_URL = "http://localhost:5000/api/v4/hr";
+
 
 const initialFields = [
   { id: 1, type: "text", label: "First name" },
@@ -62,9 +63,7 @@ const CreateFormPage = () => {
   const handleButtonClick = async (e) => {
     e.preventDefault();
     try {
-      console.log("cjheck 1 ");
-
-      const response = await axios.post(`${API_BASE_URL}/create-form`, {
+      const response = await axiosInstance.post(`${API_BASE_URL}/create-form`, {
         jobId: "675de11118b6462062cffc18",
         formData: fields,
       });
@@ -93,7 +92,7 @@ const CreateFormPage = () => {
           onClick={handleButtonClick}
           disabled={isButtonDisabled} // Disable condition
         >
-          {isButtonDisabled ? "Submitted" : "Submit Form"}
+          {isButtonDisabled ? "Submitted" : "Submit"}
         </button>
       </div>
       {generatedLink && (

@@ -9,6 +9,7 @@ import CandidatePage from './views/Candidate/CandidatePage';
 import AuthComponent from './components/Auth/Auth';
 import CreateJobFormPage from './views/Hr/CreateJobFormPage/CreateJobFormPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import CandidateForm from './views/Candidate/CandidateForm';
 import './index.css';
 
 const Main = () => (
@@ -44,6 +45,7 @@ const Main = () => (
           }
         />
         <Route path="/apply-here" element={<CandidatePage />} />
+        <Route path="/form/:formId" element={<CandidateForm />} />
       </Routes>
     </Router>
   </Provider>

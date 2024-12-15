@@ -20,6 +20,8 @@ const generateResponse = async (systemInstructions, taskInstructions, inputText)
     });
 
     const rawResponse = response.choices[0].message.content;
+    console.log("raw response", rawResponse);
+    
     try {
       
       const validJson = JSON.parse(rawResponse);
@@ -40,4 +42,4 @@ export default generateResponse
 
 
 
-// \n\nInput:\n${inputText}\n\nOutput:
+// // \n\nInput:\n${inputText}\n\nOutput:

@@ -4,7 +4,9 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'; //apne server se user ke browser ki cookies access kar paon or unpe crud lagasakoon
 import hrRoutes from './routes/hr.route.js';  // Import routes
 import userRoutes from "./routes/user.route.js"
+import candidateRoutes from "./routes/candidate.route.js"
 import dotenv from 'dotenv';
+import { verifyJWT } from './middlewares/auth.middleware.js';
 dotenv.config(); 
 
 
@@ -31,13 +33,14 @@ app.use("/api/user", userRoutes);
 // Middleware to parse JSON
 
 // Define routes
-app.use('/api/v4/hr', hrRoutes);
-app.use((err, req, res, next) => {
-  console.error("Error:", err.message);
-  const statusCode = err.statusCode || 500;
-  const message = err.message || "An unexpected error occurred";
-  res.status(statusCode).json({ message });
-});
+app.use('/api/v4/hr',verifyJWT, hrRoutes);
+app.use('/api/v4/candidate',candidateRoutes)
+// app.use((err, req, res, next) => {
+//   console.error("Error:", err.message);
+//   const statusCode = err.statusCode || 500;
+//   const message = err.message || "An unexpected error occurred";
+//   res.status(statusCode).json({ message });
+// });
 
 
 // Start the server

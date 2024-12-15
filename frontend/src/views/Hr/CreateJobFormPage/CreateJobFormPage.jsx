@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { UploadOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { message  } from "antd";
-
+import axiosInstance from '../../../axios/AxiosInstance';
 
 const CreateJobFormPage = () => {
   const navigate = useNavigate();
@@ -22,16 +22,19 @@ const CreateJobFormPage = () => {
       message.error('Please upload a file.');
       return;
     }
+
   
     // try {
-    //   const response = await axios.post('http://localhost:5000/api/v4/hr/process-jd', formData, {
+    //   const response = await axiosInstance.post('http://localhost:5000/api/v4/hr/process-jd', formData, {
     //     headers: {
     //       'Content-Type': 'multipart/form-data',
     //     },
     //   });
-    //   message.success(response.data.message);
+    //   message.success(response.data.message || 'jd processed succesfully');
+    // navigate('/create-form')
+
     // } catch (error) {
-    //   console.error('Error:', error.response?.data || error.message);
+    //   console.error('Error:', error.response?.data || eror.message);
     //   message.error('Failed to process job description.');
     // }
 
@@ -62,7 +65,7 @@ const CreateJobFormPage = () => {
           name="image"
           valuePropName="fileList"
           getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
-          rules={[{ required: true, message: 'Please upload a file!' }]}
+          rules={[{ required: false, message: 'Please upload a file!' }]}
         >
           <Upload beforeUpload={() => false} maxCount={1}>
             <Button icon={<UploadOutlined />}>Click to Upload</Button>
@@ -80,3 +83,4 @@ const CreateJobFormPage = () => {
 };
 
 export default CreateJobFormPage;
+r
