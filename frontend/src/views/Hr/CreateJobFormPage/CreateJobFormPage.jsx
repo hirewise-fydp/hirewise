@@ -10,20 +10,34 @@ const CreateJobFormPage = () => {
   const navigate = useNavigate();
 
   const [messageApi, contextHolder] = message.useMessage();
-
   const onFinish = async (values) => {
-    console.log('Form values:', values);
-    try {
-      const response = await axios.post('http://localhost:5000/api/v4/hr/process-jd', values )
-      messageApi.open({
-        type: 'success',
-        content: response.message,
-      });
-    } catch (error) {
-      console.log(error);
-      
-    }
+    const formData = new FormData();
+    formData.append('title', values.title);
+  
 
+    const file = values.image?.[0]?.originFileObj;
+    if (file) {
+      formData.append('image', file); 
+    } else {
+      message.error('Please upload a file.');
+      return;
+    }
+  
+    // try {
+    //   const response = await axios.post('http://localhost:5000/api/v4/hr/process-jd', formData, {
+    //     headers: {
+    //       'Content-Type': 'multipart/form-data',
+    //     },
+    //   });
+    //   message.success(response.data.message);
+    // } catch (error) {
+    //   console.error('Error:', error.response?.data || error.message);
+    //   message.error('Failed to process job description.');
+    // }
+
+    console.log(formData);
+    navigate('/create-form')
+    
   };
 
   return (
