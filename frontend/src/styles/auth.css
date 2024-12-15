@@ -1,33 +1,62 @@
-body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    width: auto;
-    box-sizing: border-box;
-  }
-  
-  .container-fluid {
-    background-color: #f8e1e1; /* Light pink background */
-  }
-  
-  .bg-white {
-    background-color: #ffffff;
-  }
-  
-  .shadow {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .form-control {
-    border-radius: 8px;
-    padding: 12px;
-  }
-  
-  .btn-primary, .btn-outline-primary {
-    border-radius: 8px;
-  }
-  
-  .btn i {
-    margin-right: 8px;
-  }
-  
+.vh-100 {
+  height: 100vh;
+}
+
+.auth-bg {
+  background-color: #f9f9f9;
+}
+
+.auth-container {
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.auth-title {
+  margin-bottom: 20px;
+}
+
+.wave {
+  display: inline-block;
+}
+
+.auth-form .auth-input {
+  height: 40px;
+  font-size: 14px;
+}
+
+.auth-options {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.forgot-password {
+  color: red;
+  cursor: pointer;
+}
+
+.auth-button {
+  width: 100%;
+  background-color: #1677ff;
+}
+
+.auth-signup {
+  margin: 15px 0;
+  font-size: 14px;
+}
+
+.signup-link {
+  color: #1677ff;
+  cursor: pointer;
+}
+
+.social-login .facebook-button {
+  width: 100%;
+  color: #1877f2;
+  border: 1px solid #1877f2;
+  font-weight: bold;
+}

@@ -104,44 +104,53 @@ For missing fields (e.g., salary details or benefits), include the property but 
 Follow the schema format exactly. Use arrays where specified. Retain all essential details and omit extraneous or irrelevant information.
 `;
 
+// export const processJd = async (req, res) => {
+//   const filePath = path.join(__dirname, '../uploads/', req.file.filename);
+//   const { title } = req.body;
+
+//   if (!title) {
+//     return res.status(400).json({ error: 'Job title is required' });
+//   }
+
+//   try {
+    
+//     const newJob = await JobDescription.create({ jobTitle: title });
+//     const extractedText = await extractTextFromFile(filePath);
+
+    
+//     const gptResponse = await generateResponse(SYSTEM_INSTRUCTIONS, TASK_INSTRUCTIONS, extractedText);
+
+    
+//     Object.assign(newJob, gptResponse);
+//     await newJob.save();
+
+    
+//     res.status(201).json({
+//       message: 'Job description created and processed successfully',
+//       jobDescription: newJob,
+//     });
+//   } catch (error) {
+//     console.error('Error handling job description:', error.response?.data || error.message);
+
+    
+//     if (error instanceof ApiError) {
+//       res.status(error.statusCode).json({ error: error.message });
+//     } else {
+//       res.status(500).json({ error: 'Failed to process and create job description' });
+//     }
+//   } finally {
+    
+//     cleanupFile(filePath);
+//   }
+// };
+
 export const processJd = async (req, res) => {
-  const filePath = path.join(__dirname, '../uploads/', req.file.filename);
-  const { title } = req.body;
-
-  if (!title) {
-    return res.status(400).json({ error: 'Job title is required' });
-  }
-
-  try {
-    
-    const newJob = await JobDescription.create({ jobTitle: title });
-    const extractedText = await extractTextFromFile(filePath);
-
-    
-    const gptResponse = await generateResponse(SYSTEM_INSTRUCTIONS, TASK_INSTRUCTIONS, extractedText);
-
-    
-    Object.assign(newJob, gptResponse);
-    await newJob.save();
-
-    
-    res.status(201).json({
-      message: 'Job description created and processed successfully',
-      jobDescription: newJob,
-    });
-  } catch (error) {
-    console.error('Error handling job description:', error.response?.data || error.message);
-
-    
-    if (error instanceof ApiError) {
-      res.status(error.statusCode).json({ error: error.message });
-    } else {
-      res.status(500).json({ error: 'Failed to process and create job description' });
-    }
-  } finally {
-    
-    cleanupFile(filePath);
-  }
+  console.log("REQ", req.cookies);
+  
+  res.status(201).json({
+          message: 'Job description created and processed successfully',
+          
+        });
 };
 /**
  * Extracts text from the uploaded file using the OCR service.

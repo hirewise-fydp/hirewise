@@ -1,212 +1,278 @@
 import React, { useState } from "react";
-import "../../styles/auth.css";
-import "bootstrap/dist/css/bootstrap.min.css";
-import axios from "axios";
-import { Navigate, useNavigate } from "react-router-dom";
-const API_BASE_URL = "http://localhost:5000/api/user";
+import "antd/dist/reset.css";
+import { Button, Col, Form, Input, Select, Row, Typography, message } from "antd";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { login, register } from "../../slices/authSlice";
+
+const { Title, Text } = Typography;
+const { Option } = Select;
 
 const AuthComponent = () => {
   const [showSignup, setShowSignup] = useState(false);
-  const [error, setError] = useState();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role: "HR",
-  });
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-    console.log("formData:",formData)
-  };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-        if (!showSignup) {
-          const response = await axios.post(`${API_BASE_URL}/login`, {
-            email: formData.email,
-            password: formData.password,
-          });
-          alert("Login Successful!");
-          navigate("/create-form")
+  const { loading } = useSelector((state) => state.auth);
 
-          console.log("response:", response);
-        } else {
-          const response = await axios.post(`${API_BASE_URL}/register`, formData);
-          alert("Signup Successful!");
-          console.log(response.data);
-        }
-      } catch (error) {
-        // Handle the error message appropriately
-        const errorMessage = error.response?.data?.message || "An error occurred";
-        setError(errorMessage)
-        console.error("Error:", errorMessage);
+  const handleFormSubmit = async (values) => {
+    if (showSignup) {
+      // Dispatch signup action
+      const result = await dispatch(register(values));
+      console.log(result);
+      
+      if (result.type === "auth/register/fulfilled") {
+        setShowSignup(false);
+        message.success("Signup successful! Please log in.");
+      } else {
+        message.error(result.payload || "Signup failed.");
       }
+    } else {
+      const { email, password } = values;
+      const result = await dispatch(login({ email, password }));
+      
+      if (result.type === "auth/login/fulfilled") {
+        message.success("Login successful!");
+        navigate("/home");
+      } else {
+        message.error(result.payload || "Login failed.");
+      }
+    }
   };
+
+  const commonFormItems = [
+    {
+      name: "email",
+      label: "Email",
+      rules: [
+        { required: true, message: "Please enter your email!" },
+        { type: "email", message: "Please enter a valid email!" },
+      ],
+      input: <Input placeholder="Email" />,
+    },
+    {
+      name: "password",
+      label: "Password",
+      rules: [
+        { required: true, message: "Please enter your password!" },
+      ],
+      input: <Input.Password placeholder="Password" />,
+    },
+  ];
 
   return (
-    <div className="container-fluid vw-100 vh-100 bg-light">
-      <div className="row h-100 align-items-center justify-content-center">
-        {/* Conditional Rendering for Login or Signup */}
-        {!showSignup ? (
-          // Login Form
-          <div className=" vw-80 col-md-5 p-5 bg-white shadow rounded">
-            <h3 className="text-center mb-4">
-              Hi, Welcome Back!{" "}
-              <span role="img" aria-label="wave">
-                👋
-              </span>
-            </h3>
-            <form>
-              <div className="mb-3">
-                <label className="form-label">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  className="form-control"
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  value={formData.password}
-                  className="form-control"
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <div className="form-check">
-                  <input
-                    type="checkbox"
-                    className="form-check-input"
-                    id="rememberMe"
-                  />
-                  <label className="form-check-label" htmlFor="rememberMe">
-                    Remember Me
-                  </label>
-                </div>
-                <div className="text-danger">
-                    {error}
-                </div>
-                <a href="#" className="text-danger">
-                  Forgot Password?
-                </a>
-              </div>
-              <button  onClick={handleSubmit} type="submit" className="btn btn-primary w-100 mb-3">
-                Login
-              </button>
-            </form>
-            <div className="text-center">
-              <p>
-                Don't have an account?{" "}
-                <span
-                  className="text-primary fw-bold cursor-pointer"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => setShowSignup(true)}
-                >
-                  Sign Up
-                </span>
-              </p>
-            </div>
-            <hr className="my-4" />
-            <button className="btn btn-outline-primary w-100">
-              <i className="fab fa-facebook me-2"></i> Login with Facebook
-            </button>
-          </div>
-        ) : (
-          // Sign Up Form
-          <div className="row vw-80  vh-70 col-md-5 p-5 bg-white shadow rounded">
-            <h3 className="text-center mb-4">
-              Connect with your friends today!
-            </h3>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label className="form-label">Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Name"
-                  value={formData.name}
-                  className="form-control"
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Role</label>
-                <select
-                  name="role"
-                  value={formData.role}
-                  className="form-control"
+    <Row justify="center" align="middle" className="vh-100 bg-light">
+      <Col xs={22} sm={16} md={12} lg={8} className="p-4 bg-white shadow rounded">
+        <Title level={3} className="text-center mb-4">
+          {showSignup ? "Connect with your friends today!" : "Hi, Welcome Back! 👋"}
+        </Title>
 
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="HR">HR</option>
-                  <option value="Admin">Admin</option>
-                </select>
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  className="form-control"
+        <Form layout="vertical" onFinish={handleFormSubmit}>
+          {showSignup && (
+            <>
+              <Form.Item
+                name="name"
+                label="Name"
+                rules={[{ required: true, message: "Please enter your name!" }]}
+              >
+                <Input placeholder="Name" />
+              </Form.Item>
+              <Form.Item
+                name="role"
+                label="Role"
+                rules={[{ required: true, message: "Please select a role!" }]}
+              >
+                <Select placeholder="Select a role">
+                  <Option value="HR">HR</Option>
+                  <Option value="Admin">Admin</Option>
+                </Select>
+              </Form.Item>
+            </>
+          )}
 
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  value={formData.password}
-                  className="form-control"
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <button type="submit" className="btn btn-primary w-100 mb-3">
-                Sign Up
-              </button>
-            </form>
-            <div className="text-center">
-              <p>
-                Already have an account?{" "}
-                <span
-                  className="text-primary fw-bold"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => setShowSignup(false)}
-                >
-                  Login
-                </span>
-              </p>
-            </div>
-            <hr className="my-4" />
-            <button className="btn btn-outline-primary w-100">
-              <i className="fab fa-facebook me-2"></i> Signup with Facebook
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
+          {commonFormItems.map(({ name, label, rules, input }) => (
+            <Form.Item key={name} name={name} label={label} rules={rules}>
+              {input}
+            </Form.Item>
+          ))}
+
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="w-100"
+              loading={loading}
+            >
+              {showSignup ? "Sign Up" : "Login"}
+            </Button>
+          </Form.Item>
+        </Form>
+
+        <div className="text-center">
+          <Text>
+            {showSignup
+              ? "Already have an account? "
+              : "Don't have an account? "}
+            <Text
+              type="primary"
+              style={{ cursor: "pointer" }}
+              onClick={() => setShowSignup(!showSignup)}
+            >
+              {showSignup ? "Login" : "Sign Up"}
+            </Text>
+          </Text>
+        </div>
+      </Col>
+    </Row>
   );
 };
 
 export default AuthComponent;
+
+
+
+
+// // import React, { useState } from 'react';
+// // import { Button, Col, Form, Input, Row, Typography, message } from 'antd';
+// // import { useDispatch, useSelector } from 'react-redux';
+// // import { login } from '../../slices/authSlice';
+// // import { useNavigate } from 'react-router-dom';
+
+// // const { Title } = Typography;
+
+// // const AuthComponent = () => {
+// //   const [loading, setLoading] = useState(false);
+// //   const dispatch = useDispatch();
+// //   const navigate = useNavigate();
+
+// //   const handleFormSubmit = async (values) => {
+// //     setLoading(true);
+// //     try {
+// //       const result = await dispatch(login(values)).unwrap();
+// //       message.success('Login successful!');
+// //       console.log('Login result:', result);
+// //       navigate('/home');
+// //     } catch (error) {
+// //       message.error(error);
+// //     } finally {
+// //       setLoading(false);
+// //     }
+// //   };
+
+// //   return (
+// //     <Row justify="center" align="middle" className="vh-100 bg-light">
+// //       <Col xs={22} sm={16} md={12} lg={8} className="p-4 bg-white shadow rounded">
+// //         <Title level={3} className="text-center mb-4">
+// //           Hi, Welcome Back!
+// //         </Title>
+
+// //         <Form layout="vertical" onFinish={handleFormSubmit}>
+// //           <Form.Item
+// //             name="email"
+// //             label="Email"
+// //             rules={[{ required: true, message: 'Please enter your email!' }]}
+// //           >
+// //             <Input placeholder="Email" />
+// //           </Form.Item>
+// //           <Form.Item
+// //             name="password"
+// //             label="Password"
+// //             rules={[{ required: true, message: 'Please enter your password!' }]}
+// //           >
+// //             <Input.Password placeholder="Password" />
+// //           </Form.Item>
+// //           <Form.Item>
+// //             <Button type="primary" htmlType="submit" className="w-100" loading={loading}>
+// //               Login
+// //             </Button>
+// //           </Form.Item>
+// //         </Form>
+// //       </Col>
+// //     </Row>
+// //   );
+// // };
+
+// // export default AuthComponent;
+
+
+// import React, { useState } from "react";
+// import "antd/dist/reset.css";
+// import { Button, Col, Form, Input, Row, Typography, Checkbox } from "antd";
+// import { useNavigate } from "react-router-dom";
+// import { useDispatch, useSelector } from "react-redux";
+// import { login } from "../../slices/authSlice";
+// import "../../styles/auth.css"
+
+// const { Title, Text } = Typography;
+
+// const AuthComponent = () => {
+//   const dispatch = useDispatch();
+//   const navigate = useNavigate();
+//   const { loading } = useSelector((state) => state.auth);
+
+//   const handleLogin = async (values) => {
+//     const { email, password } = values;
+//     const result = await dispatch(login({ email, password }));
+//     if (result.type === "auth/login/fulfilled") {
+//       navigate("/home");
+//     }
+//   };
+
+//   return (
+//     <Row justify="center" align="middle" className="vh-100 auth-bg">
+//       <Col xs={22} sm={16} md={12} lg={8} className="auth-container">
+//         {/* Header */}
+//         <Title level={3} className="auth-title">
+//           Hi, Welcome Back! <span className="wave">👋</span>
+//         </Title>
+
+//         {/* Login Form */}
+//         <Form layout="vertical" onFinish={handleLogin} className="auth-form">
+//           <Form.Item
+//             name="email"
+//             rules={[{ required: true, type: "email", message: "Enter a valid email!" }]}
+//           >
+//             <Input placeholder="Email" className="auth-input" />
+//           </Form.Item>
+
+//           <Form.Item
+//             name="password"
+//             rules={[{ required: true, message: "Enter your password!" }]}
+//           >
+//             <Input.Password placeholder="Password" className="auth-input" />
+//           </Form.Item>
+
+//           <div className="auth-options">
+//             <Checkbox>Remember Me</Checkbox>
+//             <Text className="forgot-password">Forgot Password?</Text>
+//           </div>
+
+//           <Form.Item>
+//             <Button
+//               type="primary"
+//               htmlType="submit"
+//               className="auth-button"
+//               loading={loading}
+//             >
+//               Login
+//             </Button>
+//           </Form.Item>
+//         </Form>
+
+//         {/* Sign Up Link */}
+//         <div className="auth-signup">
+//           <Text>Don't have an account? </Text>
+//           <Text strong className="signup-link">
+//             Sign Up
+//           </Text>
+//         </div>
+
+//         {/* Facebook Button */}
+//         <div className="social-login">
+//           <Button className="facebook-button">Login with Facebook</Button>
+//         </div>
+//       </Col>
+//     </Row>
+//   );
+// };
+
+// export default AuthComponent;

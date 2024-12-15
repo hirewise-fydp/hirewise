@@ -3,17 +3,26 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import dotenv from 'dotenv';
+dotenv.config(); 
 
-const generateAccessAndRefreshTokens = async (userId) => {
-  const user = await User.findById(userId);
-  const accessToken = jwt.sign({ _id: user._id }, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "15m",
-  });
-  const refreshToken = jwt.sign({ _id: user._id }, process.env.REFRESH_TOKEN_SECRET, {
-    expiresIn: "7d",
-  });
-  return { accessToken, refreshToken };
-};
+const generateAccessAndRefreshTokens = async(userId)=>{
+  console.log(userId);
+  try {
+      const user = await User.findById(userId)
+      const accessToken = user.generateAccessToken()
+      const refreshToken = user.generateRefreshToken()
+
+      user.refreshToken = refreshToken 
+      await user.save({validateBeforeSave: false})
+
+      return {accessToken, refreshToken}
+      
+  } catch (error) {
+      throw new ApiError(500, "Something went wrong while generating Access and Refresh Token")
+  }
+}
+
 
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, role } = req.body;
@@ -39,6 +48,9 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
+  console.log("REQ", email, password);
+  
+
   if (!email || !password) {
     return next(new ApiError(400, "Email and password are required"));
   }
@@ -55,6 +67,11 @@ const loginUser = asyncHandler(async (req, res, next) => {
   }
 
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
+  console.log(accessToken, refreshToken);
+
+  console.log("COOKIES", req.cookies);
+  
+  
 
   res
     .cookie("accessToken", accessToken, { httpOnly: true, secure: true })
@@ -65,5 +82,18 @@ const loginUser = asyncHandler(async (req, res, next) => {
     });
 });
 
+const checkAuth = (req, res, next) => {
+  const token = req.cookies.accessToken;
+  if (!token) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    return res.status(200).json({ user: decoded });
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
+};
 
-export { registerUser, loginUser };
+
+export { registerUser, loginUser, checkAuth };

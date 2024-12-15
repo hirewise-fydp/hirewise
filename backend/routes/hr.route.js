@@ -1,6 +1,7 @@
 import express from 'express';
 import { createJD, createForm, processJd } from '../controllers/hr.controller.js';
 import { upload } from '../middlewares/multer.middleware.js';
+import { verifyJWT } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
