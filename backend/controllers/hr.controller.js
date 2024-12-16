@@ -7,8 +7,7 @@ import { fileURLToPath } from 'url';
 import jwt from "jsonwebtoken"
 import FormData from 'form-data';
 
-
-
+import mongoose from 'mongoose';
 import axios from 'axios';
 import generateResponse from '../services/gptService.js';
 import { ApiError } from '../utils/ApiError.js';
@@ -18,17 +17,11 @@ const __dirname = path.dirname(__filename);
 
 export const createForm = async (req, res) => {
   try {
-    console.log(req.body)
     const { jobId, formData } = req.body;
-    console.log("jobid",String(jobId))
-    // if (!jobId || !formData) {
-    //   return res.status(400).json({ error: 'Job ID and form data are required' });
-    // }
-    // const jobExists = await JobDescription.findById(jobId);
-    // if (!jobExists) {
-    //   return res.status(404).json({ error: 'Job description not found' });
-    // }
-    const newForm = await Form.create({jobId, formData} );
+    const { ObjectId } = mongoose.Types;
+    const ID = new ObjectId(jobId)
+    
+    const newForm = await Form.create({jobId: ID, formData: formData} );
     res.status(201).json({ message: 'Form created', form: newForm });
   } catch (error) {
     res.status(500).json({ error: 'Failed to create form' });

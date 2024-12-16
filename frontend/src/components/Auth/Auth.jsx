@@ -4,6 +4,7 @@ import { Button, Col, Form, Input, Select, Row, Typography, message } from "antd
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { login, register } from "../../slices/authSlice";
+import '../../styles/auth.css'
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -19,7 +20,7 @@ const AuthComponent = () => {
       // Dispatch signup action
       const result = await dispatch(register(values));
       console.log(result);
-      
+
       if (result.type === "auth/register/fulfilled") {
         setShowSignup(false);
         message.success("Signup successful! Please log in.");
@@ -29,7 +30,7 @@ const AuthComponent = () => {
     } else {
       const { email, password } = values;
       const result = await dispatch(login({ email, password }));
-      
+
       if (result.type === "auth/login/fulfilled") {
         message.success("Login successful!");
         navigate("/home");
@@ -60,7 +61,7 @@ const AuthComponent = () => {
   ];
 
   return (
-    <Row justify="center" align="middle" className="vh-100 bg-light">
+    <Row justify="center" align="middle" className="vh-100 bg-light" colorBorder='black'>
       <Col xs={22} sm={16} md={12} lg={8} className="p-4 bg-white shadow rounded">
         <Title level={3} className="text-center mb-4">
           {showSignup ? "Connect with your friends today!" : "Hi, Welcome Back! 👋"}
@@ -212,8 +213,12 @@ export default AuthComponent;
 //   const handleLogin = async (values) => {
 //     const { email, password } = values;
 //     const result = await dispatch(login({ email, password }));
-//     if (result.type === "auth/login/fulfilled") {
-//       navigate("/home");
+//     if (result.type === "auth/register/fulfilled") {
+//       setShowSignup(false);
+//       message.success("Signup successful! Please log in.");
+//       navigate('/home')
+//     } else {
+//       message.error(result.payload || "Signup failed.");
 //     }
 //   };
 
@@ -222,7 +227,7 @@ export default AuthComponent;
 //       <Col xs={22} sm={16} md={12} lg={8} className="auth-container">
 //         {/* Header */}
 //         <Title level={3} className="auth-title">
-//           Hi, Welcome Back! <span className="wave">👋</span>
+//           Welcome to HIREWISE <span className="wave">v</span>
 //         </Title>
 
 //         {/* Login Form */}
@@ -267,9 +272,9 @@ export default AuthComponent;
 //         </div>
 
 //         {/* Facebook Button */}
-//         <div className="social-login">
+//         {/* <div className="social-login">
 //           <Button className="facebook-button">Login with Facebook</Button>
-//         </div>
+//         </div> */}
 //       </Col>
 //     </Row>
 //   );

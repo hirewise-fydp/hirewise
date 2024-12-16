@@ -3,8 +3,11 @@ import FormBuilder from "../../components/FormBuilder/FormBuilder";
 import FormPreview from "../../components/FormBuilder/FormPreview";
 import "../../styles/createForm.css";
 import axiosInstance from "../../axios/AxiosInstance";
-const API_BASE_URL = "http://localhost:5000/api/v4/hr";
+import { useSelector } from "react-redux";
+import { Button, Alert, Input, Space, message } from "antd";
+import { CopyOutlined, CheckOutlined, LinkOutlined } from "@ant-design/icons";
 
+const API_BASE_URL = "http://localhost:5000/api/v4/hr";
 
 const initialFields = [
   { id: 1, type: "text", label: "First name" },
@@ -15,19 +18,23 @@ const initialFields = [
 const CreateFormPage = () => {
   const [fields, setFields] = useState(initialFields);
   const [generatedLink, setGeneratedLink] = useState("");
-  const [isCopied, setIsCopied] = useState(false); // State to track button highlight
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const jobId = useSelector((state) => state.job.jobId);
 
-  console.log("FIELDS", fields);
+  const [isCopied, setIsCopied] = useState(false);
 
   const copyToClipboard = () => {
     navigator.clipboard
       .writeText(generatedLink)
       .then(() => {
-        setIsCopied(true); // Highlight the button
-        setTimeout(() => setIsCopied(false), 2000); // Remove highlight after 2 seconds
+        setIsCopied(true);
+        message.success("Link copied to clipboard!"); // Ant Design message notification
+        setTimeout(() => setIsCopied(false), 2000);
       })
-      .catch((err) => console.error("Could not copy link", err));
+      .catch((err) => {
+        console.error("Could not copy link", err);
+        message.error("Failed to copy link.");
+      });
   };
 
   const addField = (type, label, options = []) => {
@@ -51,33 +58,28 @@ const CreateFormPage = () => {
       )
     );
   };
-  // const handleButtonClick =async  () => {
-  //   const response = await axios.post(`${API_BASE_URL}/create-form`, {
-  //     jobId: "15151511541541541541541",
-  //     formdata: fields,
-  //   });
-  //   alert("Form Submitted!");
-  //   console.log("Form Fields:", fields); // To check the current fields in console
-  // };
 
   const handleButtonClick = async (e) => {
     e.preventDefault();
     try {
       const response = await axiosInstance.post(`${API_BASE_URL}/create-form`, {
-        jobId: "675de11118b6462062cffc18",
+        jobId: jobId,
         formData: fields,
       });
       if (response) {
         setIsButtonDisabled(true);
         const formId = response.data.form._id;
         setGeneratedLink(`http://localhost:5173/form/${formId}`);
+        message.success("Form submitted successfully!");
       }
-
-      const data = await response.json();
-    } catch {}
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      message.error("Failed to submit form.");
+    }
   };
+
   return (
-    <>
+    <div className="form-container">
       <div className="FormPageHeroDiv">
         <FormBuilder addField={addField} />
         <FormPreview
@@ -87,38 +89,42 @@ const CreateFormPage = () => {
         />
       </div>
       <div className="text-center mt-4">
-        <button
-          className="btn btn-primary"
+        <Button
+          type="primary"
           onClick={handleButtonClick}
-          disabled={isButtonDisabled} // Disable condition
+          disabled={isButtonDisabled}
+          size="large"
         >
           {isButtonDisabled ? "Submitted" : "Submit"}
-        </button>
+        </Button>
       </div>
+
       {generatedLink && (
-        <div className="alert alert-success mt-3 text-center">
-          <h5>Form Link:</h5>
-          <div className="d-flex justify-content-center align-items-center">
-            <a
-              href={generatedLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="me-2"
-            >
-              {generatedLink}
-            </a>
-            <button
-              onClick={copyToClipboard}
-              className={`btn btn-sm ${
-                isCopied ? "btn-success" : "btn-primary"
-              }`}
-            >
-              {isCopied ? "Copied" : "Copy"}
-            </button>
-          </div>
-        </div>
+        <Alert
+          message="Form Link Generated"
+          type="success"
+          showIcon
+          className="mt-4 text-center"
+          description={
+            <Space size="middle" align="center">
+              <Input
+                value={generatedLink}
+                addonBefore={<LinkOutlined />}
+                readOnly
+                style={{ maxWidth: "400px" }}
+              />
+              <Button
+                type={isCopied ? "dashed" : "primary"}
+                icon={isCopied ? <CheckOutlined /> : <CopyOutlined />}
+                onClick={copyToClipboard}
+              >
+                {isCopied ? "Copied" : "Copy"}
+              </Button>
+            </Space>
+          }
+        />
       )}
-    </>
+    </div>
   );
 };
 

@@ -1,51 +1,44 @@
 import React from 'react';
-import { Form, Input, Button, Upload } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { Form, Input, Button, Upload, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
-import axios from 'axios';
-import { message  } from "antd";
-import axiosInstance from '../../../axios/AxiosInstance';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { processJobDescription } from '../../../slices/jobSlice';
 
 const CreateJobFormPage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const [messageApi, contextHolder] = message.useMessage();
   const onFinish = async (values) => {
     const formData = new FormData();
     formData.append('title', values.title);
-  
 
     const file = values.image?.[0]?.originFileObj;
     if (file) {
-      formData.append('image', file); 
+      formData.append('image', file);
     } else {
       message.error('Please upload a file.');
       return;
     }
 
-  
-    // try {
-    //   const response = await axiosInstance.post('http://localhost:5000/api/v4/hr/process-jd', formData, {
-    //     headers: {
-    //       'Content-Type': 'multipart/form-data',
-    //     },
-    //   });
-    //   message.success(response.data.message || 'jd processed succesfully');
-    // navigate('/create-form')
+    try {
+      // Dispatch the Redux action
+      const resultAction = await dispatch(processJobDescription(formData));
 
-    // } catch (error) {
-    //   console.error('Error:', error.response?.data || eror.message);
-    //   message.error('Failed to process job description.');
-    // }
-
-    console.log(formData);
-    navigate('/create-form')
-    
+      if (processJobDescription.fulfilled.match(resultAction)) {
+        message.success('Job description processed successfully!');
+        console.log('Saved Job ID:', resultAction.payload); 
+        navigate('/create-form');
+      } else {
+        message.error(resultAction.payload || 'Failed to process job description.');
+      }
+    } catch (error) {
+      message.error('An error occurred.');
+    }
   };
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f0f2f5' }}>
-      {contextHolder}
       <Form
         name="create-job-form"
         onFinish={onFinish}
@@ -65,7 +58,6 @@ const CreateJobFormPage = () => {
           name="image"
           valuePropName="fileList"
           getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
-          rules={[{ required: false, message: 'Please upload a file!' }]}
         >
           <Upload beforeUpload={() => false} maxCount={1}>
             <Button icon={<UploadOutlined />}>Click to Upload</Button>
@@ -83,4 +75,3 @@ const CreateJobFormPage = () => {
 };
 
 export default CreateJobFormPage;
-r
