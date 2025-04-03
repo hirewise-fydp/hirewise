@@ -2,6 +2,7 @@ import React from 'react'
 import { Button } from 'antd'
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import HRDashboard from './components/HRDashboard/index';
 
 
 
@@ -12,10 +13,7 @@ const App = () => {
 
   return (
     <div className="App">
-      <h1>Hello {user.name}</h1>
-      <Button onClick={( ) => navigate('/Create-job')}>
-        Create Job 
-      </Button>
+      <HRDashboard/>
     </div>
   )
 }

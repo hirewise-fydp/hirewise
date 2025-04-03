@@ -8,7 +8,6 @@ const initialState = {
   error: null,
 };
 
-// Async thunk to process job description
 export const processJobDescription = createAsyncThunk(
   'job/processJobDescription',
   async (formData, { rejectWithValue }) => {
@@ -22,7 +21,7 @@ export const processJobDescription = createAsyncThunk(
       );
       console.log("RESPONSE IS>>>>>>>>", response);
       
-      return response.data.jobDescription._id; 
+      return response.data.jobId ; 
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to process job description.');
     }

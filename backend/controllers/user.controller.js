@@ -95,5 +95,34 @@ const checkAuth = (req, res, next) => {
   }
 };
 
+const logoutUser = asyncHandler(async(req,res) => {  
+  await User.findByIdAndUpdate(
+      req.user._id, //ye auth middleware se mila h
+      {
+          $set: {
+              refreshToken:undefined
+          }
+      },
+      {
+          new: true
+      }
+      )
 
-export { registerUser, loginUser, checkAuth };
+      const options = {
+          httpOnly: true,
+          secure: true
+      }
+
+      return res.
+      status(200)
+      .clearCookie("accessToken", options)
+      .clearCookie("refreshToken", options)
+      .json(
+          { message: "User Logged Out"}
+      )
+
+
+})
+
+
+export { registerUser, loginUser, checkAuth, logoutUser };

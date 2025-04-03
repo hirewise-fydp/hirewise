@@ -1,17 +1,60 @@
 import mongoose from "mongoose";
-const Schema = mongoose.Schema;
 
-const formSchema = new Schema({
-    // jobId: { type: mongoose.Schema.Types.ObjectId, ref: 'JobDescription', required: true },
-    jobId:{type:Schema.Types.ObjectId,required:true},
-    formData: [
-        {
-            label: { type: String, required: true },
-            type: { type: String, enum: ['text', 'number', 'email', 'date', 'textarea', 'select'], required: true },
-            options: { type: [String], default: [] },
-            required: { type: Boolean, default: true }
-        }
-    ]
-}, { timestamps: true });
+const formSchema = new mongoose.Schema(
+  {
+    job: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "JobDescription",
+      required: true,
+    },
+    fields: [
+      {
+        id: {
+          type: String,
+          required: true,
+        },
+        type: {
+          type: String,
+          enum: [
+            "text",
+            "email",
+            "number",
+            "textarea",
+            "select",
+            "checkbox",
+            "date",
+            "file",
+          ],
+          required: true,
+        },
+        label: {
+          type: String,
+          required: true,
+        },
+        placeholder: {
+          type: String,
+          default: "",
+        },
+        required: {
+          type: Boolean,
+          default: false,
+        },
+        editable: {
+          type: Boolean,
+          default: true,
+        },
+        accept: {
+          type: String, // File type restrictions (e.g., ".pdf,.doc,.docx")
+          default: "",
+        },
+        options: {
+          type: [String], // Options for select and checkbox fields
+          default: [],
+        },
+      },
+    ],
+  },
+  { timestamps: true }
+);
 
-export const Form = mongoose.model('Form', formSchema);
+export const Form = mongoose.model("Form", formSchema);

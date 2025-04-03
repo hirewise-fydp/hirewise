@@ -1,12 +1,15 @@
 import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
-
 const jobDescriptionSchema = new Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   jobTitle: {
     type: String,
-    // required: true
+    required: true
   },
   jobSummary: {
     type: String,
@@ -18,7 +21,7 @@ const jobDescriptionSchema = new Schema({
   },
   qualifications: {
     education: {
-      type: String, 
+      type: String,
       // required: true
     },
     experience: {
@@ -36,21 +39,40 @@ const jobDescriptionSchema = new Schema({
   },
   compensation: {
     salaryRange: {
-      type: String, 
+      type: String,
       required: false,
       default: ''
     },
     benefits: {
-      type: [String], 
+      type: [String],
       required: false
     }
   },
   applicationProcess: {
     type: String,
     // required: true
-  }
-});
-
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'completed', 'failed', 'retrying'], default: 'pending'
+  },
+  modules: {
+    cvScreening: {
+      type: Boolean,
+      default: false
+    },
+    automatedTesting: {
+      type: Boolean,
+      default: false
+    }
+  },
+  isActive: {
+    type: Boolean,
+    // default: true
+  },
+  tests: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Test'
+  }]
+}, { timestamps: true });
 export const JobDescription = mongoose.model('JobDescription', jobDescriptionSchema);
-
-

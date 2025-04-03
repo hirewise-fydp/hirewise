@@ -1,45 +1,137 @@
-.auth-container {
-  max-width: 600px;
-  margin: 50px auto;
-  padding: 20px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.vh-100 {
+.parent {
+  background-image: url("../../../frontend/public/HIREWISE.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  width: 100vw;
+  display: flex;
+  align-items: center;
   height: 100vh;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.2);
+  background-blend-mode: darken;
 }
 
-.bg-light {
-  background-color: #f8f9fa;
+.auth-container {
+  max-width: 400px;
+  margin: auto;
+  padding: 60px 20px;
+  border-radius: 20px;
+  /* From https://css.glass */
+background: rgba(255, 255, 255, 0.23);
+border-radius: 16px;
+box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+backdrop-filter: blur(5.3px);
+-webkit-backdrop-filter: blur(5.3px);
+border: 1px solid rgba(255, 255, 255, 0.56);
 }
 
-.error-text {
-  color: red;
-  font-size: 0.8rem;
+.steps-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.step-container {
+  text-align: center;
+}
+.step-content {
+  color: white !important;
 }
 
-.mb-4 {
-  margin-bottom: 1rem;
+.step-title {
+  color: white !important;
+  margin-bottom: 30px !important;
+  font-size: 24px;
+  font-weight: bold;
 }
 
-.w-100 {
-  width: 100%;
+
+.auth-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  gap: 15px;
+  margin: auto;
+  width:80%;
+  
 }
 
-.m-2 {
-  margin: 0.5rem;
+.auth-button {
+  flex: 1;
+  background-color: rgba(255, 255, 255, 0);
+  color: #ffffff  ;
+  border: 2px solid #ffffff !important ;
 }
 
-.p-4 {
-  padding: 1rem;
+.next-button {
+  margin-top: 20px;
 }
 
-.shadow {
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+
+
+.role-buttons {
+  display: flex;
+  margin: auto;
+  justify-content: space-between;
+  gap: 15px;
+  width:60%;
 }
 
-.rounded {
-  border-radius: 8px;
+.role-button {
+  flex: 2;
+  background-color: rgba(255, 255, 255, 0);
+  color: #ffffff  ;
+  border: 2px solid #ffffff !important ;
+}
+
+.back-button{
+  width: 80%;
+  background-color: #b0b3b8;
+  margin: auto;  
+  border: none;
+}
+
+
+.back-button:hover{
+  background-color: #d2d5da !important;
+  color: black !important;
+  border: none;
+  
+}
+
+.auth-page-button-divs{
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: auto;
+
+}
+
+.submit-button {
+  width: 50%;
+  margin-top: 20px;
+  background-color: rgba(255, 255, 255, 0);
+  color: #ffffff  ;
+  border: 2px solid #ffffff !important ;
+}
+.auth-back-button{
+  background-color: #b0b3b8;
+  color: black;
+  border: none !important;
+}
+.auth-back-button:hover{
+  background-color: #d2d5da !important;
+  color: black !important;
+  border: none;
+  
+}
+
+
+
+.ant-steps-item-title{
+  color: white !important;
+  font-size: 1.5rem !important;
+}
+
+.ant-steps-icon-dot{
+  background: white !important;
 }

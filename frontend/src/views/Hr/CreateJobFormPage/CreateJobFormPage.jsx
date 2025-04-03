@@ -22,14 +22,14 @@ const CreateJobFormPage = () => {
     }
 
     try {
-      // Dispatch the Redux action
       const resultAction = await dispatch(processJobDescription(formData));
-
       if (processJobDescription.fulfilled.match(resultAction)) {
         message.success('Job description processed successfully!');
         console.log('Saved Job ID:', resultAction.payload); 
-        navigate('/create-form');
+        navigate('/create-form', { state: { jobId: resultAction.payload }
+        });
       } else {
+        console.log('resultAction.payload', resultAction.payload)
         message.error(resultAction.payload || 'Failed to process job description.');
       }
     } catch (error) {

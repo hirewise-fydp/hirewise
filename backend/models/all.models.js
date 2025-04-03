@@ -23,7 +23,7 @@ const UserSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-// Job Schema
+
 const JobSchema = new mongoose.Schema({
   jobTitle: {
     type: String,
@@ -89,7 +89,7 @@ const JobSchema = new mongoose.Schema({
   }],
 }, { timestamps: true });
 
-// Test Schema
+
 const TestSchema = new mongoose.Schema({
   job: {
     type: mongoose.Schema.Types.ObjectId,
@@ -116,7 +116,7 @@ const TestSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// CV Schema
+
 const CVSchema = new mongoose.Schema({
   job: {
     type: mongoose.Schema.Types.ObjectId,
@@ -133,7 +133,7 @@ const CVSchema = new mongoose.Schema({
   },
   cvFile: {
     type: String,
-    required: true // Path to CV file
+    required: true
   },
   screeningScore: {
     type: Number,
@@ -155,7 +155,7 @@ const CVSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Form Builder Schema
+
 const FormSchema = new mongoose.Schema({
   job: {
     type: mongoose.Schema.Types.ObjectId,
@@ -173,7 +173,7 @@ const FormSchema = new mongoose.Schema({
       required: true
     },
     options: {
-      type: [String], // For select, checkbox, radio fields
+      type: [String], 
       default: []
     },
     required: {
