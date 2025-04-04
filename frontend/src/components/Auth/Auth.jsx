@@ -32,6 +32,7 @@ const AuthComponent = () => {
         const result = await dispatch(register({ ...values, role }));
         if (result.type === "auth/register/fulfilled") {
           message.success("Signup successful!");
+          console.log("chnage")
 
         } else {
           message.error("Signup failed");
