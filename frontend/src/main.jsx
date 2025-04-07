@@ -13,9 +13,10 @@ import HRDashboard from "./views/Hr/Dashboard/HrDashboard";
 import "./index.css";
 import Navbar from "./components/Navbar/Navbar";
 import JobFormBuilder from "./views/Hr/JobFormBuilder/JobFormBuilder";
+import TestDataFormBuilder from "./views/Hr/testDataFormBuilder/TestDataFormBuilder";
 import PublicFormPage from "./views/Hr/PublicFormPage/PublicFormPage";
 import CreateJobFormPage from "./views/Hr/CreateJobFormPage/CreateJobFormPage";
-
+import ConfirmationModal from "./views/Hr/hrConfirmationDialog/moduleTwoDataDialog"
 const MainLayout = () => {
   const location = useLocation();
   const hideNavbarRoutes = ["/"];
@@ -64,6 +65,22 @@ const MainLayout = () => {
           element={
             <ProtectedRoute>
               <JobFormBuilder />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/test-confirmation-dialog"
+          element={
+            <ProtectedRoute>
+              <ConfirmationModal/>
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/test-data-module-two-form"
+          element={
+            <ProtectedRoute>
+              <TestDataFormBuilder/>
             </ProtectedRoute>
           }
         />
