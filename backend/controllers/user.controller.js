@@ -39,10 +39,13 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = await User.create({ name, email, role, password: hashedPassword });
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id)
 
-  res.status(201).json({
+
+  res.status(201).cookie("accessToken", accessToken, { httpOnly: true, secure: true })
+  .cookie("refreshToken", refreshToken, { httpOnly: true, secure: true }).json({
     message: "User registered successfully",
-    user: { id: user._id, name: user.name, email: user.email, role: user.role },
+    user: { id: user._id, name: user.name, email: user.email, role: user.role }
   });
 });
 const loginUser = asyncHandler(async (req, res, next) => {

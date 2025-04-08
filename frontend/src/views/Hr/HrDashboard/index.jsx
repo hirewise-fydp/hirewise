@@ -5,21 +5,26 @@ import {
   FileSearchOutlined,
   SettingOutlined
 } from '@ant-design/icons';
-import DashboardView from './DashboardView';
-import JobsList from './JobsList';
-import ApplicationsView from './ApplicationsView';
-import SettingsView from './SettingsView';
+import DashboardView from '../../../components/HRDashboard/DashboardView';
+import JobsList from '../../../components/HRDashboard/JobsList';
+import ApplicationsView from '../../../components/HRDashboard/ApplicationsView';
+import SettingsView from '../../../components/HRDashboard/SettingsView';
 
 const { Sider, Content } = Layout;
 
 export default function HRDashboard() {
   const [collapsed, setCollapsed] = useState(false);
   const [activeView, setActiveView] = useState('dashboard');
-  const [selectedJob, setSelectedJob] = useState(null);
+  const [selectedJobId, setSelectedJobId] = useState(null);
 
   const handleMenuSelect = ({ key }) => {
     setActiveView(key);
-    setSelectedJob(null);
+    setSelectedJobId(null);
+  };
+
+  const handleManageJob = (jobId) => {
+    setSelectedJobId(jobId);
+    setActiveView('applications');
   };
 
   const renderContent = () => {
@@ -27,11 +32,9 @@ export default function HRDashboard() {
       case 'dashboard':
         return <DashboardView />;
       case 'jobs':
-        return selectedJob
-          ? <ApplicationsView jobId={selectedJob} onBack={() => setSelectedJob(null)} />
-          : <JobsList onManageJob={setSelectedJob} />;
+        return <JobsList onManageJob={handleManageJob} />;
       case 'applications':
-        return <ApplicationsView />;
+        return <ApplicationsView jobId={selectedJobId} onBack={() => setSelectedJobId(null)} />;
       case 'settings':
         return <SettingsView />;
       default:
@@ -45,7 +48,7 @@ export default function HRDashboard() {
         <div className="logo" />
         <Menu
           theme="dark"
-          defaultSelectedKeys={['dashboard']}
+          selectedKeys={[activeView]}
           mode="inline"
           onSelect={handleMenuSelect}
           items={[
@@ -55,7 +58,6 @@ export default function HRDashboard() {
             { key: 'settings', icon: <SettingOutlined />, label: 'Settings' }
           ]}
         />
-
       </Sider>
       <Layout className="site-layout">
         <Content style={{ margin: '0 16px' }}>

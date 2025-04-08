@@ -7,20 +7,18 @@ import { useNavigate } from 'react-router-dom';
 
 export default function JobsList({ onManageJob }) {
   const { jobs, loading } = useJobs();
-  console.log('jobs', jobs);
-  
-  let navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleCreateJob = () => {
-    navigate('/create-job')
-  }
+    navigate('/create-job');
+  };
 
   const columns = jobColumns.map(col => {
     if (col.key === 'action') {
       return {
         ...col,
         render: (_, record) => (
-          <Button type="link" onClick={() => onManageJob(record.id)}>
+          <Button type="link" onClick={() => onManageJob(record._id)}>
             Manage
           </Button>
         )
@@ -30,14 +28,18 @@ export default function JobsList({ onManageJob }) {
   });
 
   return (
-    <Card 
-      title="Posted Jobs" 
-      extra={<Button type="primary" onClick={handleCreateJob} icon={<PlusOutlined />}>Create New Job</Button>}
+    <Card
+      title="Posted Jobs"
+      extra={
+        <Button type="primary" onClick={handleCreateJob} icon={<PlusOutlined />}>
+          Create New Job
+        </Button>
+      }
     >
-      <Table 
-        columns={columns} 
-        dataSource={jobs} 
-        rowKey="id"
+      <Table
+        columns={columns}
+        dataSource={jobs}
+        rowKey="_id"
         loading={loading}
       />
     </Card>

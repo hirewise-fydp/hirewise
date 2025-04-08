@@ -16,7 +16,7 @@ export default function FormBuilder({ onSaveForm, job }) {
   }
   console.log('job', job);
 
-  const [formTitle, setFormTitle] = useState('Job Application Form'); 
+  const [formTitle, setFormTitle] = useState('Job Application Form');
   const [formFields, setFormFields] = useState([
     {
       id: 'name',
@@ -61,7 +61,7 @@ export default function FormBuilder({ onSaveForm, job }) {
     },
   ]);
 
-  
+
   useEffect(() => {
     if (job?.jobTitle) {
       setFormTitle(job.jobTitle);
@@ -74,7 +74,7 @@ export default function FormBuilder({ onSaveForm, job }) {
 
   const removeField = (id) => {
     if (['name', 'email', 'phone', 'cv', 'coverLetter'].includes(id)) {
-      return; 
+      return;
     }
     setFormFields(formFields.filter((field) => field.id !== id));
   };
@@ -108,7 +108,7 @@ export default function FormBuilder({ onSaveForm, job }) {
           <FormPreview
             fields={formFields}
             onRemove={removeField}
-            onSubmit={() => {}} // Placeholder for form submission
+            onSubmit={() => { }}
             isBuilder={true}
             onUpdate={updateField}
           />

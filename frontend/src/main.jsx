@@ -4,18 +4,17 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "r
 import { Provider } from "react-redux";
 import { store } from "./store/store";
 import App from "./App";
-import CandidatePage from "./views/Candidate/CandidatePage";
 import AuthComponent from "./components/Auth/Auth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import CandidateForm from "./views/Candidate/CandidateForm";
-import HRDashboard from "./views/Hr/Dashboard/HrDashboard";
 import "./index.css";
 import Navbar from "./components/Navbar/Navbar";
 import JobFormBuilder from "./views/Hr/JobFormBuilder/JobFormBuilder";
+import TestDataFormBuilder from "./views/Hr/testDataFormBuilder/TestDataFormBuilder";
 import PublicFormPage from "./views/Hr/PublicFormPage/PublicFormPage";
 import CreateJobFormPage from "./views/Hr/CreateJobFormPage/CreateJobFormPage";
-
+import ConfirmationModal from "./views/Hr/hrConfirmationDialog/moduleTwoDataDialog"
 const MainLayout = () => {
   const location = useLocation();
   const hideNavbarRoutes = ["/"];
@@ -51,19 +50,35 @@ const MainLayout = () => {
             </ProtectedRoute>
           }
         />
-        <Route
+        {/* <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
               <HRDashboard />
             </ProtectedRoute>
           }
-        />
+        /> */}
         <Route
           path="/create-form"
           element={
             <ProtectedRoute>
               <JobFormBuilder />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/test-confirmation-dialog"
+          element={
+            <ProtectedRoute>
+              <ConfirmationModal />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/test-data-module-two-form"
+          element={
+            <ProtectedRoute>
+              <TestDataFormBuilder />
             </ProtectedRoute>
           }
         />

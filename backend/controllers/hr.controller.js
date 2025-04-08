@@ -33,7 +33,7 @@ export const extractTextFromFile = async (filePath) => {
     const formData = new FormData();
     formData.append('image', fs.createReadStream(filePath));
 
-    const response = await axios.post('http://192.168.100.6:5001/extract-text', formData, {
+    const response = await axios.post('http://192.168.0.109:5001/extract-text', formData, {
       headers: formData.getHeaders(),
       timeout: 5000, 
     });
