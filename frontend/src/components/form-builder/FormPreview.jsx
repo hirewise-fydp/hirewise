@@ -14,83 +14,19 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 const FormField = ({ field, onRemove, onUpdate, isBuilder }) => {
-  // const renderInput = () => {
-  //   switch (field.type) {
-  //     case "text":
-  //     case "email":
-  //     case "number":
-  //       return (
-  //         <Input
-  //           name={field.id}
-  //           type={field.type}
-  //           placeholder={field.placeholder}
-  //         />
-  //       );
-  //     case "textarea":
-  //       return <TextArea name={field.id} placeholder={field.placeholder} />;
-  //     case "select":
-  //       return (
-  //         <>
-  //           <Select
-  //             placeholder={field.placeholder}
-  //             style={{ width: "100%" }}
-  //             id={field.id}
-  //           >
-  //             {field.options?.map((option, index) => (
-  //               <Option key={index} value={option}>
-  //                 {option}
-  //               </Option>
-  //             ))}
-  //           </Select>
-  //           {/* This hidden input helps FormData capture the selected value */}
-  //           <input type="hidden" name={field.id} id={`hidden-${field.id}`} />
-  //         </>
-  //       );
-  //     case "checkbox":
-  //       return (
-  //         <Checkbox.Group
-  //           name={field.id}
-  //           onChange={(checkedValues) =>
-  //             onUpdate(field.id, { value: checkedValues })
-  //           }
-  //         >
-  //           {field.options?.map((option, index) => (
-  //             <Checkbox key={index} value={option}>
-  //               {option}
-  //             </Checkbox>
-  //           ))}
-  //         </Checkbox.Group>
-  //       );
-  //     case "date":
-  //       return (
-  //         <DatePicker
-  //           style={{ width: "100%" }}
-  //           name={field.id}
-  //           onChange={(date, dateString) =>
-  //             onUpdate(field.id, { value: dateString })
-  //           }
-  //         />
-  //       );
-  //     case "file":
-  //       return <Input name={field.id} type="file" accept={field.accept} />;
-  //     default:
-  //       return null;
-  //   }
-  // };
-
   const renderInput = () => {
     switch (field.type) {
       case 'text':
-        return <Input placeholder={field.placeholder} />;
+        return <Input placeholder={field.placeholder} disabled={isBuilder} />;
       case 'email':
-        return <Input type="email" placeholder={field.placeholder} />;
+        return <Input type="email" placeholder={field.placeholder} disabled={isBuilder} />;
       case 'number':
-        return <Input type="number" placeholder={field.placeholder} />;
+        return <Input type="number" placeholder={field.placeholder} disabled={isBuilder} />;
       case 'textarea':
-        return <TextArea placeholder={field.placeholder} />;
+        return <TextArea placeholder={field.placeholder} disabled={isBuilder} />;
       case 'select':
         return (
-          <Select placeholder={field.placeholder}  style={{ width: '100%' }}>
+          <Select placeholder={field.placeholder} style={{ width: '100%' }} disabled={isBuilder}>
             {field.options?.map((option, index) => (
               <Option key={index} value={option}>
                 {option}
@@ -100,7 +36,7 @@ const FormField = ({ field, onRemove, onUpdate, isBuilder }) => {
         );
       case 'checkbox':
         return (
-          <Checkbox.Group>
+          <Checkbox.Group disabled={isBuilder}>
             {field.options?.map((option, index) => (
               <Checkbox key={index} value={option}>
                 {option}
@@ -109,9 +45,9 @@ const FormField = ({ field, onRemove, onUpdate, isBuilder }) => {
           </Checkbox.Group>
         );
       case 'date':
-        return <DatePicker style={{ width: '100%' }} />;
+        return <DatePicker style={{ width: '100%' }} disabled={isBuilder} />;
       case 'file':
-        return <Input type="file" accept={field.accept} />;
+        return <Input type="file" accept={field.accept} disabled={isBuilder} />;
       default:
         return null;
     }

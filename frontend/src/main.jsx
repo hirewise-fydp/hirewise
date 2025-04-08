@@ -4,12 +4,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "r
 import { Provider } from "react-redux";
 import { store } from "./store/store";
 import App from "./App";
-import CandidatePage from "./views/Candidate/CandidatePage";
 import AuthComponent from "./components/Auth/Auth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import CandidateForm from "./views/Candidate/CandidateForm";
-import HRDashboard from "./views/Hr/Dashboard/HrDashboard";
 import "./index.css";
 import Navbar from "./components/Navbar/Navbar";
 import JobFormBuilder from "./views/Hr/JobFormBuilder/JobFormBuilder";
@@ -52,14 +50,14 @@ const MainLayout = () => {
             </ProtectedRoute>
           }
         />
-        <Route
+        {/* <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
               <HRDashboard />
             </ProtectedRoute>
           }
-        />
+        /> */}
         <Route
           path="/create-form"
           element={
@@ -72,15 +70,15 @@ const MainLayout = () => {
           path="/test-confirmation-dialog"
           element={
             <ProtectedRoute>
-              <ConfirmationModal/>
+              <ConfirmationModal />
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/test-data-module-two-form"
           element={
             <ProtectedRoute>
-              <TestDataFormBuilder/>
+              <TestDataFormBuilder />
             </ProtectedRoute>
           }
         />
