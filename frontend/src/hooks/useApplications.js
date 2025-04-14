@@ -1,25 +1,45 @@
 import { useState, useEffect } from 'react';
-
-const mockApplications = [
-  { id: 1, jobId: 1, name: "John Doe", status: "Screened", score: "85%" },
-  { id: 2, jobId: 1, name: "Jane Smith", status: "Tested", score: "92%" },
-  { id: 3, jobId: 2, name: "Bob Johnson", status: "Rejected", score: "60%" }
-];
+import axiosInstance from '../axios/AxiosInstance';
 
 export default function useApplications(jobId) {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Replace with actual API call
-    setTimeout(() => {
-      const filtered = jobId 
-        ? mockApplications.filter(app => app.jobId === jobId)
-        : mockApplications;
-      setApplications(filtered);
+    const fetchApplications = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await axiosInstance.get(`/api/v4/hr/getAllCandidate/${jobId}`);
+
+        // Map API response to the expected format for the Table
+        const mappedApplications = response.data.map(candidate => ({
+          _id: candidate._id,
+          jobId: candidate.job._id,
+          name: candidate.candidateName,
+          status: candidate.status,
+          score: `${candidate.cvScore}%`, // Format score as percentage
+        }));
+
+        setApplications(mappedApplications);
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to fetch candidates');
+        console.error('Error fetching applications:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (jobId) {
+      fetchApplications();
+    } else {
+      // If no jobId is provided, return an empty array
+      setApplications([]);
       setLoading(false);
-    }, 500);
+    }
   }, [jobId]);
 
-  return { applications, loading };
+  return { applications, loading, error };
 }

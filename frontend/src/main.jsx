@@ -15,6 +15,7 @@ import TestDataFormBuilder from "./views/Hr/testDataFormBuilder/TestDataFormBuil
 import PublicFormPage from "./views/Hr/PublicFormPage/PublicFormPage";
 import CreateJobFormPage from "./views/Hr/CreateJobFormPage/CreateJobFormPage";
 import ConfirmationModal from "./views/Hr/hrConfirmationDialog/moduleTwoDataDialog"
+import TestCreationPage from "./views/Hr/TestCreationPage";
 const MainLayout = () => {
   const location = useLocation();
   const hideNavbarRoutes = ["/"];
@@ -50,14 +51,7 @@ const MainLayout = () => {
             </ProtectedRoute>
           }
         />
-        {/* <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <HRDashboard />
-            </ProtectedRoute>
-          }
-        /> */}
+
         <Route
           path="/create-form"
           element={
@@ -66,6 +60,7 @@ const MainLayout = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/create-test" element={<ProtectedRoute><TestCreationPage /></ProtectedRoute>} /> {/* New route */}
         <Route
           path="/test-confirmation-dialog"
           element={

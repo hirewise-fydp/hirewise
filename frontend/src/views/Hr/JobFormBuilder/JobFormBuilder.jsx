@@ -49,7 +49,7 @@ export default function JobFormBuilder() {
   const handleSaveForm = (id) => {
     setFormId(id);
     message.success('Form saved successfully!', id);
-    // navigate('/home');
+    navigate('/create-test', { state: { jobId } })
   };
 
   return (

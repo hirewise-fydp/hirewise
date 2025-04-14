@@ -8,8 +8,9 @@ import FormData from 'form-data';
 import mongoose from 'mongoose';
 import axios from 'axios';
 import { ApiError } from '../utils/ApiError.js';
-import { addJobToQueue } from '../Queue/ocr/ocrProducer.js';
+import { addJobToQueue } from '../Queue/jd/ocrProducer.js';
 import { ocrQueue } from '../Queue/Queue.js';
+import { CandidateApplication } from '../models/candidate.model.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,13 +30,15 @@ const validateFile = (file) => {
 
 
 export const extractTextFromFile = async (filePath) => {
+  console.log('hellloooooo');
+
   try {
     const formData = new FormData();
     formData.append('image', fs.createReadStream(filePath));
 
-    const response = await axios.post('http://192.168.0.109:5001/extract-text', formData, {
+    const response = await axios.post('http://127.0.0.1:5001/extract-text', formData, {
       headers: formData.getHeaders(),
-      timeout: 5000, 
+      timeout: 5000,
     });
 
     if (!response.data || !response.data.text) {
@@ -108,7 +111,7 @@ export const createForm = async (req, res) => {
   try {
     const { jobId, fields } = req.body;
     console.log('Request received to create form:', jobId, fields);
-    
+
 
     const jobExists = await JobDescription.findById(jobId);
     if (!jobExists) {
@@ -138,7 +141,7 @@ export const getFormById = async (req, res) => {
       return res.status(400).json({ message: 'Form ID is required' });
     }
 
-    const form = await Form.findById(formId).populate('job'); 
+    const form = await Form.findById(formId).populate('job');
 
     if (!form) {
       return res.status(404).json({ message: 'Form not found' });
@@ -170,8 +173,8 @@ export const retryJob = async (req, res) => {
     }
 
     await ocrQueue.add('retryJob', {
-      filePath: failedJob.filePath, 
-      jobId: failedJob._id 
+      filePath: failedJob.filePath,
+      jobId: failedJob._id
     });
 
     await JobDescription.findByIdAndUpdate(jobId, { status: 'retrying' });
@@ -227,7 +230,7 @@ export const updateJob = async (req, res) => {
     const updateData = req.body;
 
     console.log(updateData, 'updateData');
-    
+
 
     if (!id) {
       return res.status(400).json({ message: 'Job ID is required' });
@@ -238,7 +241,7 @@ export const updateJob = async (req, res) => {
       return res.status(404).json({ message: 'Job not found' });
     }
 
-    
+
     Object.keys(updateData).forEach((key) => {
       job[key] = updateData[key];
     });
@@ -251,3 +254,23 @@ export const updateJob = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
+
+
+export const getAllCandidate = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // const jobId = mongoose.Types.ObjectId(id);
+    const candidates = await CandidateApplication.find({ job: id }).populate('job').exec();
+
+    if (!candidates) {
+      return res.status(404).json({ message: 'No candidates found for this job' });
+    }
+
+    res.status(200).json(candidates);
+  } catch (error) {
+    console.error('Error fetching candidates:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+}

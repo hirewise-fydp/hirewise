@@ -1,0 +1,108 @@
+.test-creation-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 20px;
+}
+
+.test-creation-card {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+  background: #fff;
+  padding: 20px;
+}
+
+.test-creation-card .ant-card-head {
+  border-bottom: none;
+}
+
+.test-creation-card .ant-card-head-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.ant-form-item-label > label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.ant-form-item-label > label::before {
+  color: #ff4d4f;
+}
+
+.ant-radio-wrapper {
+  font-size: 14px;
+  color: #1a1a1a;
+}
+
+.ant-input-number,
+.ant-select {
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid #d9d9d9;
+}
+
+.ant-input-number-input {
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.ant-select-selector {
+  padding: 8px 12px !important;
+  height: 40px !important;
+  font-size: 14px !important;
+}
+
+.ant-btn-dashed {
+  margin-top: 10px;
+  border-radius: 4px;
+  color: #1890ff;
+  border-color: #1890ff;
+  font-size: 14px;
+  padding: 8px 12px;
+  height: 40px;
+}
+
+.ant-btn-primary {
+  background: #1890ff;
+  border-color: #1890ff;
+  border-radius: 4px;
+  font-size: 14px;
+  padding: 8px 12px;
+  height: 40px;
+}
+
+.ant-btn-danger {
+  border-radius: 4px;
+  font-size: 14px;
+  padding: 8px 12px;
+  height: 40px;
+}
+
+.manual-questions {
+  margin-top: 20px;
+}
+
+.manual-questions ul {
+  list-style: none;
+  padding: 0;
+}
+
+.manual-questions li {
+  background: #fafafa;
+  padding: 10px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.manual-questions li strong {
+  text-transform: capitalize;
+}

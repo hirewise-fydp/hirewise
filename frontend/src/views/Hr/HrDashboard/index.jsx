@@ -19,12 +19,17 @@ export default function HRDashboard() {
 
   const handleMenuSelect = ({ key }) => {
     setActiveView(key);
-    setSelectedJobId(null);
+    setSelectedJobId(null); // Reset jobId when switching views
   };
 
   const handleManageJob = (jobId) => {
     setSelectedJobId(jobId);
     setActiveView('applications');
+  };
+
+  const handleBack = () => {
+    setActiveView('jobs'); // Return to JobsList
+    setSelectedJobId(null); // Clear selected job
   };
 
   const renderContent = () => {
@@ -34,7 +39,7 @@ export default function HRDashboard() {
       case 'jobs':
         return <JobsList onManageJob={handleManageJob} />;
       case 'applications':
-        return <ApplicationsView jobId={selectedJobId} onBack={() => setSelectedJobId(null)} />;
+        return <ApplicationsView jobId={selectedJobId} onBack={handleBack} />;
       case 'settings':
         return <SettingsView />;
       default:
@@ -54,7 +59,6 @@ export default function HRDashboard() {
           items={[
             { key: 'dashboard', icon: <UserOutlined />, label: 'Dashboard' },
             { key: 'jobs', icon: <FileSearchOutlined />, label: 'Jobs' },
-            { key: 'applications', icon: <FileSearchOutlined />, label: 'Applications' },
             { key: 'settings', icon: <SettingOutlined />, label: 'Settings' }
           ]}
         />

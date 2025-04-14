@@ -1,13 +1,19 @@
 import express from "express";
-import { getFormData, processResume } from "../controllers/candidate.controller.js";
+import { getApplicationStatus, submitApplication } from "../controllers/candidate.controller.js";
 import { upload } from '../middlewares/multer.middleware.js';
-import { compareResumeToJobDescription } from "../controllers/comparision.controller.js";
 
 
 const router = express.Router();
 
-router.get("/getformdata/:formId", getFormData);
-router.post('/process-Resume', upload.single('image'), processResume);
-router.post('/compare', compareResumeToJobDescription);
+// router.get("/getformdata/:formId", getFormData);
+router.post(
+    "/apply/:jobId",
+    upload.single('image'),
+    submitApplication
+);
+
+
+
+router.get("/status/:applicationId", getApplicationStatus);
 
 export default router;

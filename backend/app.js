@@ -7,7 +7,8 @@ import userRoutes from "./routes/user.route.js";
 import candidateRoutes from "./routes/candidate.route.js";
 import dotenv from 'dotenv';
 import { verifyJWT } from './middlewares/auth.middleware.js';
-import {worker} from './Queue/ocr/ocrWorker.js';
+import { cvWorker } from './Queue/cv/worker.js';
+import { worker } from './Queue/jd/ocrWorker.js';
 dotenv.config();
 
 const app = express();
