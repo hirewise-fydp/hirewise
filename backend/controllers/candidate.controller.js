@@ -106,3 +106,21 @@ export const getApplicationStatus = async (req, res) => {
     });
   }
 };
+
+
+export const getCandidateById = async (req, res) => {
+  const {candidateId }= req.params;
+  try {
+      const candidate = await CandidateApplication.findById(candidateId)
+          .populate('job'); // Populates the referenced JobDescription data
+
+      if (!candidate) {
+          return res.status(404).json({ message: 'Candidate not found' });
+      }
+
+      res.status(200).json(candidate);
+  } catch (error) {
+      console.error('Error retrieving candidate:', error);
+      res.status(500).json({ message: 'Server error', error });
+  }
+};
