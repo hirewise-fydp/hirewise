@@ -81,7 +81,10 @@ export const cleanupFile = (filePath) => {
 
 export const processJd = async (req, res) => {
   const filePath = path.join(__dirname, '../uploads/', req.file.filename);
-  const { title } = req.body;
+  const { title, modules } = req.body;
+  console.log("title", title);
+  console.log("modules", modules);
+  
   const { accessToken } = req.cookies;
   const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
   const userid = decoded._id;
@@ -93,7 +96,7 @@ export const processJd = async (req, res) => {
   try {
     validateFile(req.file);
 
-    const newJob = await JobDescription.create({ userId: userid, jobTitle: title, status: 'pending' });
+    const newJob = await JobDescription.create({ userId: userid, jobTitle: title, modules : modules , status: 'pending' });
 
 
     await addJobToQueue(filePath, newJob._id);

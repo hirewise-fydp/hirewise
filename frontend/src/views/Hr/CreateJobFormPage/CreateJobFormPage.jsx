@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Input, Button, Upload, message } from 'antd';
+import { Form, Input, Button, Upload, message, Switch } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -11,9 +11,20 @@ const CreateJobFormPage = () => {
 
   const onFinish = async (values) => {
     const formData = new FormData();
+    console.log("values" , values);
+    
     formData.append('title', values.title);
+    // Add automatedTesting to formData
+    formData.append('modules[automatedTesting]', values.automatedTesting);
 
     const file = values.image?.[0]?.originFileObj;
+
+    console.log(formData.get('title'));
+    console.log("for, data", formData);
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
+    }
+    
     if (file) {
       formData.append('image', file);
     } else {
@@ -22,14 +33,14 @@ const CreateJobFormPage = () => {
     }
 
     try {
+      console.log("form data : ", formData)
       const resultAction = await dispatch(processJobDescription(formData));
       if (processJobDescription.fulfilled.match(resultAction)) {
         message.success('Job description processed successfully!');
-        console.log('Saved Job ID:', resultAction.payload); 
-        navigate('/create-form', { state: { jobId: resultAction.payload }
-        });
+        console.log('Saved Job ID:', resultAction.payload);
+        navigate('/create-form', { state: { jobId: resultAction.payload } });
       } else {
-        console.log('resultAction.payload', resultAction.payload)
+        console.log('resultAction.payload', resultAction.payload);
         message.error(resultAction.payload || 'Failed to process job description.');
       }
     } catch (error) {
@@ -62,6 +73,15 @@ const CreateJobFormPage = () => {
           <Upload beforeUpload={() => false} maxCount={1}>
             <Button icon={<UploadOutlined />}>Click to Upload</Button>
           </Upload>
+        </Form.Item>
+
+        <Form.Item
+          label={<span style={{ fontSize: '16px', fontWeight: 'bold' }}>Automated Testing Module</span>}
+          name="automatedTesting"
+          valuePropName="checked"
+          initialValue={false}
+        >
+          <Switch checkedChildren="Enabled" unCheckedChildren="Disabled" />
         </Form.Item>
 
         <Form.Item>

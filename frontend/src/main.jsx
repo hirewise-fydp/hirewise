@@ -12,6 +12,7 @@ import "./index.css";
 import Navbar from "./components/Navbar/Navbar";
 import JobFormBuilder from "./views/Hr/JobFormBuilder/JobFormBuilder";
 import TestDataFormBuilder from "./views/Hr/testDataFormBuilder/TestDataFormBuilder";
+// import TestCreationPage from "./views/Hr/TestCreationPage/index";
 import PublicFormPage from "./views/Hr/PublicFormPage/PublicFormPage";
 import CreateJobFormPage from "./views/Hr/CreateJobFormPage/CreateJobFormPage";
 import ConfirmationModal from "./views/Hr/hrConfirmationDialog/moduleTwoDataDialog"
@@ -73,7 +74,7 @@ const MainLayout = () => {
           path="/test-data-module-two-form"
           element={
             <ProtectedRoute>
-              <TestDataFormBuilder />
+              <TestCreationPage />
             </ProtectedRoute>
           }
         />
