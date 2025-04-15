@@ -213,18 +213,49 @@ export const getJobDescriptionById = async (req, res) => {
   }
 };
 
+// export const findAllJobDescription = async (req, res) => {
+//   try {
+//     console.log('Request received to fetch all Job Descriptions');
+
+//     const jobDescriptions = await JobDescription.find();
+//     res.status(200).json(jobDescriptions);
+//   } catch (error) {
+//     console.error('Error fetching job descriptions:', error);
+//     res.status(500).json({ message: 'Internal Server Error' });
+//   }
+// };
+
 export const findAllJobDescription = async (req, res) => {
   try {
-    console.log('Request received to fetch all Job Descriptions');
+    console.log("Request received to fetch all Job Descriptions with Form ID");
 
-    const jobDescriptions = await JobDescription.find();
-    res.status(200).json(jobDescriptions);
+    const jobsWithFormId = await JobDescription.aggregate([
+      {
+        $lookup: {
+          from: "forms", // collection name in MongoDB
+          localField: "_id",
+          foreignField: "job",
+          as: "form"
+        }
+      },
+      {
+        $addFields: {
+          formId: { $arrayElemAt: ["$form._id", 0] }
+        }
+      },
+      {
+        $project: {
+          form: 0 // exclude full form data if you only want formId
+        }
+      }
+    ]);
+
+    res.status(200).json(jobsWithFormId);
   } catch (error) {
-    console.error('Error fetching job descriptions:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error("Error fetching job descriptions:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
 
 export const updateJob = async (req, res) => {
   try {
