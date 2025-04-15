@@ -89,23 +89,25 @@ const CandidateListingScreen = ({ jobId }) => {
   // Fetch jobs
   const { jobs } = useJobs();
   const job = jobs.find(j => j._id === jobId);
-  const jobTitle = job?.jobTitle || "Loading..."; // Fallback title
+  const jobTitle = job?.jobTitle || "Loading..."
+  const formId = job?.formId || null // Fallback to null if formId is missing
 
   // State for job and test information
   const [jobInfo, setJobInfo] = useState({
     id: jobId,
     title: "Loading...",
     hasTest: false,
-    formLink: `${window.location.origin}/form/${formId}`,
-  });
+    formLink: `${window.location.origin}/form/loading`, // Initial fallback
+  })
 
-  // Update jobInfo when jobTitle changes
+  // Update jobInfo when jobTitle or formId changes
   useEffect(() => {
     setJobInfo((prev) => ({
       ...prev,
       title: jobTitle,
-    }));
-  }, [jobTitle]);
+      formLink: formId ? `${window.location.origin}/form/${formId}` : `${window.location.origin}/form/not-available`,
+    }))
+  }, [jobTitle, formId])
 
 
 
@@ -196,8 +198,8 @@ const CandidateListingScreen = ({ jobId }) => {
   const fetchCandidateDetails = async (candidateId) => {
     setLoadingDetails(true)
     try {
-      const response = await axiosInstance.get(`/api/v4/hr/candidate/${candidateId}`)
-      setCandidateDetails(candidates)
+      const response = await axiosInstance.get(`/api/v4/candidate/${candidateId}`)
+      setCandidateDetails(response.data)
     } catch (err) {
       message.error("Failed to load candidate details")
       console.error("Error fetching candidate details:", err)
