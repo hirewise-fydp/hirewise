@@ -15,6 +15,11 @@ const jobDescriptionSchema = new Schema({
     type: String,
     // required: true
   },
+  file: {
+    url: String,
+    publicId: String,
+    format: String,
+  },
   keyResponsibilities: {
     type: [String],
     // required: true
@@ -75,4 +80,12 @@ const jobDescriptionSchema = new Schema({
     ref: 'Test'
   }]
 }, { timestamps: true });
+
+jobDescriptionSchema.pre('remove', async function(next) {
+  if (this.file?.publicId) {
+    const { deleteFromCloudinary } = await import('../utils/cloudinary.utils.js');
+    await deleteFromCloudinary(this.file.publicId);
+  }
+  next();
+});
 export const JobDescription = mongoose.model('JobDescription', jobDescriptionSchema);
