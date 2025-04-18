@@ -35,12 +35,10 @@ import {
   ReloadOutlined,
   MailOutlined,
   CopyOutlined,
-  FormOutlined,
   WarningOutlined,
 } from "@ant-design/icons"
 import dayjs from "dayjs"
 import useApplications from "../../hooks/useApplications"
-import useJobs from "../../hooks/useJobs"
 import axiosInstance from "../../axios/AxiosInstance"
 
 const { Title, Text } = Typography
@@ -67,7 +65,7 @@ const statusColors = {
   hired: "success",
 }
 
-const CandidateListingScreen = ({ jobId }) => {
+const CandidateListingScreen = ({ jobId, jobTitle }) => {
   // State for filters
   const [searchText, setSearchText] = useState("")
   const [statusFilter, setStatusFilter] = useState([])
@@ -84,55 +82,35 @@ const CandidateListingScreen = ({ jobId }) => {
   const [selectedCandidate, setSelectedCandidate] = useState(null)
   const [candidateDetails, setCandidateDetails] = useState(null)
   const [loadingDetails, setLoadingDetails] = useState(false)
-  
-
-  // Fetch jobs
-  const { jobs } = useJobs();
-  const job = jobs.find(j => j._id === jobId);
-  const jobTitle = job?.jobTitle || "Loading..."
-  const formId = job?.formId || null // Fallback to null if formId is missing
 
   // State for job and test information
   const [jobInfo, setJobInfo] = useState({
     id: jobId,
-    title: "Loading...",
+    title: jobTitle || "Job Position",
     hasTest: false,
-    formLink: `${window.location.origin}/form/loading`, // Initial fallback
+    formLink: `${window.location.origin}/apply/${jobId}`,
   })
-
-  // Update jobInfo when jobTitle or formId changes
-  useEffect(() => {
-    setJobInfo((prev) => ({
-      ...prev,
-      title: jobTitle,
-      formLink: formId ? `${window.location.origin}/form/${formId}` : `${window.location.origin}/form/not-available`,
-    }))
-  }, [jobTitle, formId])
-
-
 
   // Fetch candidates using the hook
   const { applications: candidates, loading, error } = useApplications(jobId)
-  console.log("Candidates:", candidates);
-  
 
   // Set filtered candidates when candidates change
   useEffect(() => {
     setFilteredCandidates(candidates)
   }, [candidates])
 
-  console.log("Filtered Candidates:", filteredCandidates);
-  
-
   // Check if job has a test
   useEffect(() => {
     const checkJobTest = async () => {
       try {
-        const response = await axiosInstance.get(`/api/v4/hr/job/hasTest/${jobId}`)
+        const response = await axiosInstance.get(`/api/v4/hr/hasTest/${jobId}`)
         setJobInfo((prev) => ({
           ...prev,
           hasTest: response.data.hasTest,
         }))
+
+        console.log("Job test check response:", response.data);
+        
       } catch (err) {
         console.error("Error checking if job has test:", err)
       }
@@ -198,7 +176,7 @@ const CandidateListingScreen = ({ jobId }) => {
   const fetchCandidateDetails = async (candidateId) => {
     setLoadingDetails(true)
     try {
-      const response = await axiosInstance.get(`/api/v4/candidate/${candidateId}`)
+      const response = await axiosInstance.get(`/api/v4/hr/candidate/${candidateId}`)
       setCandidateDetails(response.data)
     } catch (err) {
       message.error("Failed to load candidate details")
@@ -236,13 +214,6 @@ const CandidateListingScreen = ({ jobId }) => {
       default:
         break
     }
-  }
-
-  // Handle creating a test
-  const handleCreateTest = () => {
-    message.info("Redirecting to test creation page...")
-    // In a real app, this would redirect to the test creation page
-    window.location.href = `/hr/jobs/${jobId}/create-test`
   }
 
   // Handle copying form link
@@ -390,17 +361,12 @@ const CandidateListingScreen = ({ jobId }) => {
               <div>
                 <WarningOutlined style={{ marginRight: 8 }} />
                 <span>
-                  No test has been created for this job position. Create a test to evaluate candidates effectively.
+                  No test has been created for this job position. Candidates cannot be fully evaluated without a test.
                 </span>
               </div>
-              <Space>
-                <Button type="primary" icon={<FormOutlined />} onClick={handleCreateTest}>
-                  Create Test
-                </Button>
-                <Button icon={<CopyOutlined />} onClick={handleCopyFormLink}>
-                  Copy Form Link
-                </Button>
-              </Space>
+              <Button icon={<CopyOutlined />} onClick={handleCopyFormLink}>
+                Copy Form Link
+              </Button>
             </div>
           }
           type="warning"

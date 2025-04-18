@@ -17,6 +17,7 @@ import PublicFormPage from "./views/Hr/PublicFormPage/PublicFormPage";
 import CreateJobFormPage from "./views/Hr/CreateJobFormPage/CreateJobFormPage";
 import ConfirmationModal from "./views/Hr/hrConfirmationDialog/moduleTwoDataDialog"
 import TestCreationPage from "./views/Hr/TestCreationPage";
+import JobDetails from "./components/JobDetails";
 const MainLayout = () => {
   const location = useLocation();
   const hideNavbarRoutes = ["/"];
@@ -49,6 +50,24 @@ const MainLayout = () => {
           element={
             <ProtectedRoute>
               <CreateJobFormPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/jobs/:jobId"
+          element={
+            <ProtectedRoute>
+              <JobDetails />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/jobs/:jobId/create-test"
+          element={
+            <ProtectedRoute>
+              <TestCreationPage />
             </ProtectedRoute>
           }
         />

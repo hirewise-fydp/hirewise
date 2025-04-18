@@ -37,24 +37,19 @@ const TestSchema = new mongoose.Schema(
     testConfig: {
       experience: {
         type: String,
-        required: true,
       },
       conceptualQuestions: {
         type: Number,
-        required: true,
       },
       logicalQuestions: {
         type: Number,
-        required: true,
       },
       basicQuestions: {
         type: Number,
-        required: true,
       },
       difficultyLevel: {
         type: String,
         enum: ["easy", "medium", "hard"],
-        required: true,
       },
     },
   },

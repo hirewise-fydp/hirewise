@@ -9,6 +9,9 @@ import { ApiError } from '../utils/ApiError.js';
 import { addJobToQueue } from '../Queue/jd/ocrProducer.js';
 import { ocrQueue } from '../Queue/Queue.js';
 import { CandidateApplication } from '../models/candidate.model.js';
+import { Test } from "../models/test.model.js"; // Adjust path to your Test model
+import generateResponse from "../services/gptService.js"; // Adjust path to your GPT service
+import mongoose from 'mongoose';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -210,12 +213,12 @@ export const getJobDescriptionById = async (req, res) => {
 
 export const findAllJobDescription = async (req, res) => {
   try {
-    console.log("Request received to fetch all Job Descriptions with Form ID");
+    console.log("Request received to fetch all Job Descriptions with Form ID and candidate count");
 
-    const jobsWithFormId = await JobDescription.aggregate([
+    const jobsWithFormIdAndCandidateCount = await JobDescription.aggregate([
       {
         $lookup: {
-          from: "forms", // collection name in MongoDB
+          from: "forms", 
           localField: "_id",
           foreignField: "job",
           as: "form"
@@ -227,13 +230,27 @@ export const findAllJobDescription = async (req, res) => {
         }
       },
       {
+        $lookup: {
+          from: "candidateapplications", 
+          localField: "_id",
+          foreignField: "job",
+          as: "candidates"
+        }
+      },
+      {
+        $addFields: {
+          candidateCount: { $size: "$candidates" }
+        }
+      },
+      {
         $project: {
-          form: 0 // exclude full form data if you only want formId
+          form: 0,
+          candidates: 0 
         }
       }
     ]);
 
-    res.status(200).json(jobsWithFormId);
+    res.status(200).json(jobsWithFormIdAndCandidateCount);
   } catch (error) {
     console.error("Error fetching job descriptions:", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -291,3 +308,202 @@ export const getAllCandidate = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }
+
+
+
+// Create a manual test
+export const createManualTest = async (req, res) => {
+  try {
+    const { job, questions } = req.body;
+
+    // Validate required fields
+    if (!job || !questions) {
+      return res.status(400).json({ message: "Job and questions are required" });
+    }
+
+    // Validate questions
+    if (!Array.isArray(questions)) {
+      return res.status(400).json({ message: "Questions must be an array" });
+    }
+
+    for (const question of questions) {
+      if (
+        !question.questionText ||
+        !Array.isArray(question.options) ||
+        question.options.length !== 4 ||
+        !question.correctAnswer ||
+        !["conceptual", "logical", "basic"].includes(question.questionType)
+      ) {
+        return res.status(400).json({ message: "Invalid question format" });
+      }
+    }
+
+    // Create and save the manual test
+    const test = new Test({
+      job,
+      questions,
+      isGeneratedByAI: false,
+    });
+
+    await test.save();
+
+    await JobDescription.findByIdAndUpdate(job, { $set: { testCreated: true } });
+
+
+    res.status(201).json({ message: "Manual test created successfully", test });
+  } catch (error) {
+    console.error("Error creating manual test:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// Generate AI-based test questions for HR review
+export const generateAITestQuestions = async (req, res) => {
+  try {
+    const { job, testConfig } = req.body;
+
+    // Validate required fields
+    if (!job || !testConfig) {
+      return res.status(400).json({ message: "Job and testConfig are required" });
+    }
+
+    // Validate testConfig fields
+    const { experience, conceptualQuestions, logicalQuestions, basicQuestions, difficultyLevel } = testConfig;
+    if (!experience || !conceptualQuestions || !logicalQuestions || !basicQuestions || !difficultyLevel) {
+      return res.status(400).json({ message: "All testConfig fields are required" });
+    }
+
+    // Prepare GPT prompt
+    const systemInstructions = `
+      You are an expert in generating test questions for job assessments. Create a set of questions based on the provided job configuration.
+      The response must be a valid JSON array of question objects, each containing:
+      - questionText: The question text
+      - options: An array of 4 possible answers
+      - correctAnswer: The correct answer (must match one of the options)
+      - questionType: One of "conceptual", "logical", or "basic"
+      Ensure the questions match the specified experience level, difficulty, and question type distribution.
+    `;
+
+    const taskInstructions = `
+      Generate ${conceptualQuestions} conceptual, ${logicalQuestions} logical, and ${basicQuestions} basic questions.
+      The questions should be suitable for a candidate with ${experience} experience and have a ${difficultyLevel} difficulty level.
+      Return the questions in a JSON array.
+    `;
+
+    const inputText = { job, testConfig };
+
+    // Call GPT service to generate questions
+    const generatedQuestions = await generateResponse(systemInstructions, taskInstructions, inputText);
+
+    // Validate generated questions
+    if (!Array.isArray(generatedQuestions)) {
+      return res.status(500).json({ message: "Invalid response format from AI service" });
+    }
+
+    for (const question of generatedQuestions) {
+      if (
+        !question.questionText ||
+        !Array.isArray(question.options) ||
+        question.options.length !== 4 ||
+        !question.correctAnswer ||
+        !["conceptual", "logical", "basic"].includes(question.questionType)
+      ) {
+        return res.status(500).json({ message: "Invalid question format from AI service" });
+      }
+    }
+
+    // Return generated questions for HR review
+    res.status(200).json({
+      message: "AI-generated questions ready for review",
+      job,
+      testConfig,
+      questions: generatedQuestions,
+    });
+  } catch (error) {
+    console.error("Error generating AI test questions:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// Save AI-generated test after HR approval
+export const saveAITest = async (req, res) => {
+  try {
+    const { job, questions, testConfig } = req.body;
+
+    // Validate required fields
+    if (!job || !questions || !testConfig) {
+      return res.status(400).json({ message: "Job, questions, and testConfig are required" });
+    }
+
+    // Validate testConfig fields
+    const { experience, conceptualQuestions, logicalQuestions, basicQuestions, difficultyLevel } = testConfig;
+    if (!experience || !conceptualQuestions || !logicalQuestions || !basicQuestions || !difficultyLevel) {
+      return res.status(400).json({ message: "All testConfig fields are required" });
+    }
+
+    // Validate questions
+    if (!Array.isArray(questions)) {
+      return res.status(400).json({ message: "Questions must be an array" });
+    }
+
+    for (const question of questions) {
+      if (
+        !question.questionText ||
+        !Array.isArray(question.options) ||
+        question.options.length !== 4 ||
+        !question.correctAnswer ||
+        !["conceptual", "logical", "basic"].includes(question.questionType)
+      ) {
+        return res.status(400).json({ message: "Invalid question format" });
+      }
+    }
+
+    // Create and save the AI-generated test
+    const test = new Test({
+      job,
+      questions,
+      testConfig,
+      isGeneratedByAI: true,
+    });
+
+    await test.save();
+
+    await JobDescription.findByIdAndUpdate(job, { $set: { testCreated: true } });
+
+
+    res.status(201).json({ message: "AI-generated test saved successfully", test });
+  } catch (error) {
+    console.error("Error saving AI-generated test:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const hasTest = async (req, res) => {
+  try {
+    const { jobId } = req.params;
+
+    // Validate jobId
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({ message: "Invalid job ID" });
+    }
+
+    // Check if a test exists for the job
+    const test = await Test.findOne({ job: jobId });
+
+    if (test) {
+      return res.status(200).json({
+        message: "Test found for job",
+        hasTest: true,
+        testId: test._id
+      });
+    } else {
+      return res.status(200).json({
+        message: "No test found for job",
+        hasTest: false
+      });
+    }
+  } catch (error) {
+    console.error("Error checking test for job:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};

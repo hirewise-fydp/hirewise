@@ -75,10 +75,10 @@ const jobDescriptionSchema = new Schema({
     type: Boolean,
     // default: true
   },
-  tests: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Test'
-  }]
+  testCreated: {
+    type: Boolean,
+    default: false
+  }
 }, { timestamps: true });
 
 jobDescriptionSchema.pre('remove', async function(next) {

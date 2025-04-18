@@ -14,11 +14,12 @@ export default function useJobs() {
       setError(null)
 
       const response = await axiosInstance.get(`/api/v4/hr/findAll`)
+      console.log('response from all jobs fetching ', response.data)
 
       // Enhance job data with candidate counts (this would typically come from the API)
       const enhancedJobs = (response.data || []).map((job) => ({
         ...job,
-        candidateCount: Math.floor(Math.random() * 20), // Mock data - replace with actual data
+        candidateCount: job.candidiateCount, // Mock data - replace with actual data
       }))
 
       setJobs(enhancedJobs)
