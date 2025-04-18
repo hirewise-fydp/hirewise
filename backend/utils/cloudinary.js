@@ -1,8 +1,11 @@
+// utils/cloudinary.utils.js
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -18,7 +21,8 @@ const RETRY_DELAY = 1000;
 export const uploadToCloudinary = async (localFilePath, options = {}) => {
   if (!localFilePath) return null;
 
-  const fileName = path.basename(localFilePath);
+  // Get file name without extension
+  const fileName = path.basename(localFilePath, path.extname(localFilePath));
   const publicId = `${options.folder || 'uploads'}/${Date.now()}_${fileName}`;
 
   const uploadWithRetry = async (attempt = 1) => {

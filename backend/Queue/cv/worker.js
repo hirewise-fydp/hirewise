@@ -1,7 +1,7 @@
 // queue/cvQueue.js
 import { Worker } from 'bullmq';
 import { connection } from '../../config/redisConfig.js';
-import { extractTextFromFile, cleanupFile } from '../../controllers/hr.controller.js';
+import { extractTextFromFile } from '../../utils/ocr.utils.js';
 import dotenv from 'dotenv';
 import { SYSTEM_INSTRUCTIONS_CV_PROCESSING, TASK_INSTRUCTIONS_CV_PROCESSING } from '../../constants.js';
 import { CandidateApplication } from '../../models/candidate.model.js';
@@ -30,7 +30,6 @@ export const cvWorker = new Worker('cvQueue', async (job) => {
 
         await evaluateCandidate(applicationId);
 
-        cleanupFile(filePath);
 
     } catch (error) {
         console.error(`CV Processing failed for application ${applicationId}:`, error);

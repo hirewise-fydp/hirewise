@@ -104,7 +104,7 @@ candidateSchema.index({ job: 1 });
 // TTL Index for auto-deletion
 candidateSchema.index({ 'dataRetention.expiresAt': 1 }, { expireAfterSeconds: 0 });
 
-candidateApplicationSchema.pre('remove', async function(next) {
+candidateSchema.pre('remove', async function(next) {
     if (this.file?.publicId) {
       const { deleteFromCloudinary } = await import('../utils/cloudinary.utils.js');
       await deleteFromCloudinary(this.file.publicId);

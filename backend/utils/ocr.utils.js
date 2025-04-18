@@ -5,20 +5,30 @@ import { ApiError } from './ApiError.js';
 
 export const extractTextFromFile = async (fileUrl, localFilePath = null) => {
   try {
-    const formData = new FormData();
+    let response;
 
     if (fileUrl && fileUrl.includes('cloudinary')) {
-      formData.append('url', fileUrl);
+      // Send the URL in a JSON payload
+      response = await axios.post(
+        'http://127.0.0.1:5001/extract-text',
+        { image_url: fileUrl },
+        {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 30000, // Increased timeout to 30 seconds
+        }
+      );
     } else if (localFilePath) {
+      // Handle local file upload using form-data
+      const formData = new FormData();
       formData.append('image', fs.createReadStream(localFilePath));
+
+      response = await axios.post('http://127.0.0.1:5001/extract-text', formData, {
+        headers: formData.getHeaders(),
+        timeout: 30000, // Increased timeout to 30 seconds
+      });
     } else {
       throw new ApiError(400, 'Invalid file source');
     }
-
-    const response = await axios.post('http://127.0.0.1:5001/extract-text', formData, {
-      headers: formData.getHeaders(),
-      timeout: 10000,
-    });
 
     if (!response.data || !response.data.text) {
       throw new ApiError(500, 'OCR failed to extract text from the file.');

@@ -3,24 +3,78 @@ from models.pdf_utils import is_pdf_scanned, process_scanned_pdf
 from models.ocr_utils import perform_ocr_on_image
 import os
 import fitz
+import requests
+import tempfile
+import time
 
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'Uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Ensure the uploads folder exists
 
 def extract_text():
     try:
-        print('Request files:', request.files)
+        # Expecting a JSON payload with an image URL
+        data = request.get_json()
+        if not data or 'image_url' not in data:
+            return jsonify({'error': 'No image URL provided'}), 400
 
-        if 'image' not in request.files or not request.files['image']:
-            return jsonify({'error': 'No file provided or file key missing'}), 400
+        image_url = data['image_url']
+        print(f'Processing image URL: {image_url}')
 
-        input_file = request.files['image']
-        input_path = os.path.join(UPLOAD_FOLDER, input_file.filename) 
-        input_file.save(input_path)
+        # Download the image with retries
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        max_retries = 3
+        retry_delay = 1  # seconds
+        for attempt in range(1, max_retries + 1):
+            try:
+                response = requests.get(image_url, headers=headers, stream=True, timeout=30)
+                print(f'Attempt {attempt}: Response status: {response.status_code}, Content-Type: {response.headers.get("content-type", "")}')
+                if response.status_code == 200:
+                    break
+                else:
+                    print(f'Attempt {attempt}: Non-200 status code: {response.status_code}, Response: {response.text}')
+                    if attempt == max_retries:
+                        return jsonify({'error': f'Failed to download image from URL after {max_retries} attempts, status code: {response.status_code}'}), 400
+            except requests.exceptions.RequestException as e:
+                print(f'Attempt {attempt}: Failed to download image from {image_url}: {str(e)}')
+                if attempt == max_retries:
+                    return jsonify({'error': f'Failed to download image from URL after {max_retries} attempts: {str(e)}'}), 400
+            time.sleep(retry_delay * attempt)
+
+        # Determine file extension from URL, Content-Type, or Content-Disposition
+        content_type = response.headers.get('content-type', '').lower()
+        content_disposition = response.headers.get('content-disposition', '').lower()
+        url_ext = os.path.splitext(image_url)[1].lower()
+
+        # Extract filename from Content-Disposition if available
+        filename = None
+        if 'filename=' in content_disposition:
+            filename = content_disposition.split('filename=')[-1].strip('"\'')
+            filename_ext = os.path.splitext(filename)[1].lower()
+
+        if 'pdf' in content_type or url_ext == '.pdf' or (filename and filename_ext == '.pdf'):
+            file_ext = '.pdf'
+        elif 'png' in content_type or url_ext == '.png' or (filename and filename_ext == '.png'):
+            file_ext = '.png'
+        elif 'jpeg' in content_type or 'jpg' in content_type or url_ext in ('.jpg', '.jpeg') or (filename and filename_ext in ('.jpg', '.jpeg')):
+            file_ext = '.jpg'
+        else:
+            print(f'Unsupported content-type: {content_type}, URL extension: {url_ext}, Content-Disposition filename: {filename}')
+            return jsonify({'error': 'Unsupported file format'}), 400
+
+        # Create a temporary file to store the downloaded content
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=file_ext, dir=UPLOAD_FOLDER)
+        input_path = temp_file.name
+        with open(input_path, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+        print(f'Saved temporary file: {input_path}')
 
         extracted_text = ""
 
-        if input_file.filename.lower().endswith('.pdf'):
+        if file_ext == '.pdf':
             if is_pdf_scanned(input_path):
                 extracted_text = process_scanned_pdf(input_path)
             else:
@@ -29,16 +83,26 @@ def extract_text():
                     page = pdf_document.load_page(page_num)
                     extracted_text += page.get_text("text") + "\n"
                 pdf_document.close()
-        elif input_file.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+        elif file_ext in ('.png', '.jpg', '.jpeg'):
             extracted_text = perform_ocr_on_image(input_path)
         else:
+            os.remove(input_path)
             return jsonify({'error': 'Unsupported file format'}), 400
 
-        # Optional: Cleanup uploaded file after processing
-        # os.remove(input_path)
+        # Clean up the temporary file
+        try:
+            os.remove(input_path)
+        except Exception as e:
+            print(f'Error cleaning up temporary file {input_path}: {e}')
 
         return jsonify({'text': extracted_text.strip()})
 
     except Exception as e:
-        print(f"Error in extract_text: {e}")
+        print(f'Error in extract_text: {e}')
+        # Ensure temporary file is cleaned up in case of error
+        if 'input_path' in locals():
+            try:
+                os.remove(input_path)
+            except Exception:
+                pass
         return jsonify({'error': str(e)}), 500

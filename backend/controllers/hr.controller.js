@@ -4,9 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import jwt from "jsonwebtoken";
-import FormData from 'form-data';
-import mongoose from 'mongoose';
-import axios from 'axios';
+import { uploadToCloudinary, safeCleanup } from '../utils/cloudinary.js';
 import { ApiError } from '../utils/ApiError.js';
 import { addJobToQueue } from '../Queue/jd/ocrProducer.js';
 import { ocrQueue } from '../Queue/Queue.js';
@@ -16,50 +14,24 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const validateFile = (file) => {
-  const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  const allowedTypes = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'image/png',
+    'image/jpeg',
+  ];
   const maxSize = 10 * 1024 * 1024;
 
+  if (!file) throw new ApiError(400, 'No file provided');
   if (!allowedTypes.includes(file.mimetype)) {
-    throw new ApiError(400, 'Invalid file type. Please upload a PDF or Word document.');
+    throw new ApiError(400, 'Invalid file type. Please upload a PDF, Word document, or image.');
   }
-
   if (file.size > maxSize) {
     throw new ApiError(400, 'File size exceeds the limit of 10MB.');
   }
 };
 
-
-export const extractTextFromFile = async (filePath) => {
-  console.log('hellloooooo');
-
-  try {
-    const formData = new FormData();
-    formData.append('image', fs.createReadStream(filePath));
-
-    const response = await axios.post('http://127.0.0.1:5001/extract-text', formData, {
-      headers: formData.getHeaders(),
-      timeout: 5000,
-    });
-
-    if (!response.data || !response.data.text) {
-      throw new ApiError(500, 'OCR failed to extract text from the file.');
-    }
-
-    return response.data.text;
-  } catch (error) {
-    // console.error('OCR Error:', error);
-
-    if (error.code === 'ECONNREFUSED') {
-      throw new ApiError(500, 'OCR server is not running. Please start the Flask server.');
-    } else if (error.response) {
-      throw new ApiError(error.response.status, error.response.data);
-    } else if (error.request) {
-      throw new ApiError(500, 'No response received from the OCR server.');
-    } else {
-      throw new ApiError(500, 'Failed to process OCR. Please try again.');
-    }
-  }
-};
 
 
 export const validateJobSchema = (data) => {
@@ -68,43 +40,54 @@ export const validateJobSchema = (data) => {
 };
 
 
-export const cleanupFile = (filePath) => {
-  try {
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-  } catch (error) {
-    console.error('Error cleaning up file:', error.message);
-  }
-};
-
-
 export const processJd = async (req, res) => {
-  const filePath = path.join(__dirname, '../uploads/', req.file.filename);
   const { title, modules } = req.body;
-  console.log("title", title);
-  console.log("modules", modules);
-  
   const { accessToken } = req.cookies;
-  const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
-  const userid = decoded._id;
-
-  if (!title) {
-    return res.status(400).json({ error: 'Job title is required' });
-  }
 
   try {
+    if (!req.file) throw new ApiError(400, 'No file uploaded');
+    if (!title) throw new ApiError(400, 'Job title is required');
+
+    const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
     validateFile(req.file);
 
-    const newJob = await JobDescription.create({ userId: userid, jobTitle: title, modules : modules , status: 'pending' });
+    const localFilePath = path.join(__dirname, '../Uploads/', req.file.filename);
 
+    const cloudinaryResult = await uploadToCloudinary(localFilePath, {
+      folder: 'hr_uploads',
+    });
 
-    await addJobToQueue(filePath, newJob._id);
+    if (!cloudinaryResult) {
+      throw new ApiError(500, 'Failed to upload file to Cloudinary');
+    }
 
-    res.status(201).json({ message: 'Job uploaded, processing in background.', jobId: newJob._id });
+    const newJob = await JobDescription.create({
+      userId: decoded._id,
+      jobTitle: title,
+      modules,
+      status: 'pending',
+      file: {
+        url: cloudinaryResult.url,
+        publicId: cloudinaryResult.publicId,
+        format: cloudinaryResult.format,
+      },
+    });
+
+    await addJobToQueue(cloudinaryResult.url, newJob._id);
+
+    res.status(201).json({
+      message: 'Job uploaded, processing in background.',
+      jobId: newJob._id,
+      fileUrl: cloudinaryResult.url,
+    });
   } catch (error) {
+    if (req.file) {
+      await safeCleanup(path.join(__dirname, '../Uploads/', req.file.filename));
+    }
     console.error('Error processing job:', error);
-    res.status(error.statusCode || 500).json({ error: error.message || 'Processing failed' });
+    res.status(error.statusCode || 500).json({
+      error: error.message || 'Processing failed',
+    });
   }
 };
 
