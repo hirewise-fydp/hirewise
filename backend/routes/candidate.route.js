@@ -9,7 +9,7 @@ import { upload } from "../middlewares/multer.middleware.js";
 const router = express.Router();
 
 // router.get("/getformdata/:formId", getFormData);
-router.post("/apply/:jobId", upload.single("image"), submitApplication);
+router.post("/apply/:formId", upload.single("cv"), submitApplication);
 
 router.get("/status/:applicationId", getApplicationStatus);
 router.get("/:candidateId", getCandidateById);

@@ -34,16 +34,13 @@ export default function HRDashboard() {
 
   const renderContent = () => {
     switch (activeView) {
-      case 'dashboard':
-        return <DashboardView />;
+      
       case 'jobs':
         return <JobsList onManageJob={handleManageJob} />;
       case 'applications':
         return <ApplicationsView jobId={selectedJobId} onBack={handleBack} />;
-      case 'settings':
-        return <SettingsView />;
       default:
-        return <DashboardView />;
+        return <JobsList onManageJob={handleManageJob} />;
     }
   };
 
@@ -57,9 +54,9 @@ export default function HRDashboard() {
           mode="inline"
           onSelect={handleMenuSelect}
           items={[
-            { key: 'dashboard', icon: <UserOutlined />, label: 'Dashboard' },
+            // { key: 'dashboard', icon: <UserOutlined />, label: 'Dashboard' },
             { key: 'jobs', icon: <FileSearchOutlined />, label: 'Jobs' },
-            { key: 'settings', icon: <SettingOutlined />, label: 'Settings' }
+            // { key: 'settings', icon: <SettingOutlined />, label: 'Settings' }
           ]}
         />
       </Sider>

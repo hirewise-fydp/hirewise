@@ -17,16 +17,16 @@ const FormField = ({ field, onRemove, onUpdate, isBuilder }) => {
   const renderInput = () => {
     switch (field.type) {
       case 'text':
-        return <Input placeholder={field.placeholder} disabled={isBuilder} />;
+        return <Input name={field.id} placeholder={field.placeholder} disabled={isBuilder} />;
       case 'email':
-        return <Input type="email" placeholder={field.placeholder} disabled={isBuilder} />;
+        return <Input name={field.id} type="email" placeholder={field.placeholder} disabled={isBuilder} />;
       case 'number':
-        return <Input type="number" placeholder={field.placeholder} disabled={isBuilder} />;
+        return <Input name={field.id} type="number" placeholder={field.placeholder} disabled={isBuilder} />;
       case 'textarea':
-        return <TextArea placeholder={field.placeholder} disabled={isBuilder} />;
+        return <TextArea name={field.id} placeholder={field.placeholder} disabled={isBuilder} />;
       case 'select':
         return (
-          <Select placeholder={field.placeholder} style={{ width: '100%' }} disabled={isBuilder}>
+          <Select name={field.id} placeholder={field.placeholder} style={{ width: '100%' }} disabled={isBuilder}>
             {field.options?.map((option, index) => (
               <Option key={index} value={option}>
                 {option}
@@ -36,7 +36,7 @@ const FormField = ({ field, onRemove, onUpdate, isBuilder }) => {
         );
       case 'checkbox':
         return (
-          <Checkbox.Group disabled={isBuilder}>
+          <Checkbox.Group name={field.id} disabled={isBuilder}>
             {field.options?.map((option, index) => (
               <Checkbox key={index} value={option}>
                 {option}
@@ -45,9 +45,9 @@ const FormField = ({ field, onRemove, onUpdate, isBuilder }) => {
           </Checkbox.Group>
         );
       case 'date':
-        return <DatePicker style={{ width: '100%' }} disabled={isBuilder} />;
+        return <DatePicker name={field.id} style={{ width: '100%' }} disabled={isBuilder} />;
       case 'file':
-        return <Input type="file" accept={field.accept} disabled={isBuilder} />;
+        return <Input name={field.id} type="file" accept={field.accept} disabled={isBuilder} />;
       default:
         return null;
     }
@@ -105,16 +105,16 @@ export default function FormPreview({
     const formData = new FormData(e.target);
     const data = {};
     fields.forEach((field) => {
-      if (field.type === "checkbox" && field.options) {
-        data[field.id] = field.options.filter(
-          (_, i) => formData.get(`${field.id}-${i}`) === "on"
-        );
+      if (field.type === "checkbox") {
+        data[field.id] = formData.getAll(field.id); // Capture array of selected values
+      } else if (field.type === "file") {
+        data[field.id] = e.target.elements[field.id].files[0] || null; // Capture file object
       } else {
-        data[field.id] = formData.get(field.id);
+        data[field.id] = formData.get(field.id); // Capture single value
       }
     });
-    console.log("data:", data);
-    onSubmit(data); // Pass the form data to the parent component
+    console.log("Form data:", data); // Debug log
+    onSubmit(data);
   };
 
   return (

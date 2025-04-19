@@ -361,6 +361,7 @@ export const createManualTest = async (req, res) => {
 export const generateAITestQuestions = async (req, res) => {
   try {
     const { job, testConfig } = req.body;
+    console.log("job value in generate AI test Questions :", job)
 
     // Validate required fields
     if (!job || !testConfig) {

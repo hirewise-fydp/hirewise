@@ -6,6 +6,7 @@ import fitz
 import requests
 import tempfile
 import time
+from docx import Document
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'Uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Ensure the uploads folder exists
@@ -57,6 +58,8 @@ def extract_text():
             file_ext = '.pdf'
         elif 'png' in content_type or url_ext == '.png' or (filename and filename_ext == '.png'):
             file_ext = '.png'
+        elif 'docx' in content_type or url_ext == '.docx' or (filename and filename_ext == '.docx'):
+            file_ext = '.docx'
         elif 'jpeg' in content_type or 'jpg' in content_type or url_ext in ('.jpg', '.jpeg') or (filename and filename_ext in ('.jpg', '.jpeg')):
             file_ext = '.jpg'
         else:
@@ -85,6 +88,32 @@ def extract_text():
                 pdf_document.close()
         elif file_ext in ('.png', '.jpg', '.jpeg'):
             extracted_text = perform_ocr_on_image(input_path)
+        elif file_ext == '.docx':
+            doc = Document(input_path)
+            extracted_text = ""
+
+            # Extract text from paragraphs
+            for para in doc.paragraphs:
+                if para.text.strip():  # Only include non-empty paragraphs
+                    extracted_text += para.text + "\n"
+
+            # Extract text from tables
+            for table in doc.tables:
+                for row in table.rows:
+                    for cell in row.cells:
+                        if cell.text.strip():  # Only include non-empty cells
+                            extracted_text += cell.text + "\n"
+
+            # Extract text from headers and footers
+            for section in doc.sections:
+                # Headers
+                for header in section.header.paragraphs:
+                    if header.text.strip():
+                        extracted_text += header.text + "\n"
+                # Footers
+                for footer in section.footer.paragraphs:
+                    if footer.text.strip():
+                        extracted_text += footer.text + "\n"
         else:
             os.remove(input_path)
             return jsonify({'error': 'Unsupported file format'}), 400

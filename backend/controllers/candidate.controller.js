@@ -8,6 +8,8 @@ import fs from 'fs';
 import FormData from 'form-data';
 import axios from 'axios';
 import { addCvToQueue } from '../Queue/cv/producer.js';
+import { Form } from '../models/form.model.js';
+import { uploadToCloudinary } from '../utils/cloudinary.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,11 +28,20 @@ export const cleanupFile = (filePath) => {
 // Submit application
 export const submitApplication = async (req, res) => {
   console.log('Received application:', req.body, req.file);
-  console.log(req.params.jobId);
 
 
   try {
-    const jobId = req.params.jobId;
+    const formId = req.params.formId;
+    if (!formId) {
+      throw new ApiError(400, 'Form ID is required');
+    }
+    // Find the form by formId to get the associated jobId
+    const form = await Form.findById(formId).select('job');
+    if (!form) {
+      throw new ApiError(404, 'Form not found');
+    }
+
+    const jobId = form.job; // Extract jobId from the form
     const { name, email, phone, ...formData } = req.body;
     const cvFile = req.file;
 
@@ -43,7 +54,14 @@ export const submitApplication = async (req, res) => {
     const job = await JobDescription.findById(jobId);
     if (!job) {
       throw new ApiError(404, 'Job not found');
-    }
+    }const localFilePath = path.join(__dirname, '../Uploads/', req.file.filename);
+    const cloudinaryResult = await uploadToCloudinary(localFilePath, {
+          folder: 'candidate_uploads',
+        });
+    
+        if (!cloudinaryResult) {
+          throw new ApiError(500, 'Failed to upload file to Cloudinary');
+        }
 
     // Create application
     const application = await CandidateApplication.create({
@@ -52,7 +70,11 @@ export const submitApplication = async (req, res) => {
       candidateEmail: email,
       candidatePhone: phone,
       formData,
-      cvFile: cvFile.path,
+      cvFile: {
+        url: cloudinaryResult.url,
+        publicId: cloudinaryResult.publicId,
+        format: cloudinaryResult.format,
+      },
       status: 'cv_processing',
     });
 
@@ -60,7 +82,7 @@ export const submitApplication = async (req, res) => {
 
 
     // Add to processing queue
-    await addCvToQueue({ filePath: cvFile.path, applicationId: application._id });
+    await addCvToQueue({filePath: cloudinaryResult.url, applicationId:application._id});
 
     return res.status(202).json({
       success: true,

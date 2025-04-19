@@ -30,9 +30,10 @@ const candidateSchema = new mongoose.Schema({
 
     // Resume Processing
     cvFile: {
-        type: String,
-        required: true
-    },
+        url: String,
+        publicId: String,
+        format: String,
+      },
     parsedResume: {
         type: mongoose.Schema.Types.Mixed
     },

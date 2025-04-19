@@ -19,8 +19,11 @@ export default function useJobs() {
       // Enhance job data with candidate counts (this would typically come from the API)
       const enhancedJobs = (response.data || []).map((job) => ({
         ...job,
-        candidateCount: job.candidiateCount, // Mock data - replace with actual data
       }))
+
+
+      console.log('enhanced jobs', enhancedJobs);
+      
 
       setJobs(enhancedJobs)
     } catch (error) {

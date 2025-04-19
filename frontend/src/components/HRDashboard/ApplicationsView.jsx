@@ -22,7 +22,8 @@ import {
   message,
   Statistic,
   Alert,
-  Spin, // Added Spin import
+  Spin,
+  Modal, // Add Modal to imports
 } from "antd"
 import {
   SearchOutlined,
@@ -39,13 +40,14 @@ import {
 } from "@ant-design/icons"
 import dayjs from "dayjs"
 import useApplications from "../../hooks/useApplications"
+import useJobs from "../../hooks/useJobs"
 import axiosInstance from "../../axios/AxiosInstance"
 
 const { Title, Text } = Typography
 const { RangePicker } = DatePicker
 const { Option } = Select
 
-// Status options for filtering
+// Status options and other constants remain unchanged
 const statusOptions = [
   { value: "cv_processing", label: "CV Processing" },
   { value: "cv_screened", label: "CV Screened" },
@@ -55,7 +57,6 @@ const statusOptions = [
   { value: "hired", label: "Hired" },
 ]
 
-// Status tag colors - using Ant Design's preset colors
 const statusColors = {
   cv_processing: "processing",
   cv_screened: "default",
@@ -65,67 +66,75 @@ const statusColors = {
   hired: "success",
 }
 
-const CandidateListingScreen = ({ jobId, jobTitle }) => {
-  // State for filters
+const CandidateListingScreen = ({ jobId }) => {
+  // Existing state variables
   const [searchText, setSearchText] = useState("")
   const [statusFilter, setStatusFilter] = useState([])
   const [cvScoreRange, setCvScoreRange] = useState([0, 100])
   const [testScoreRange, setTestScoreRange] = useState([0, 100])
   const [dateRange, setDateRange] = useState(null)
-
-  // State for table
   const [showFilters, setShowFilters] = useState(false)
   const [filteredCandidates, setFilteredCandidates] = useState([])
-
-  // State for candidate details drawer
   const [detailsVisible, setDetailsVisible] = useState(false)
   const [selectedCandidate, setSelectedCandidate] = useState(null)
   const [candidateDetails, setCandidateDetails] = useState(null)
   const [loadingDetails, setLoadingDetails] = useState(false)
-
-  // State for job and test information
   const [jobInfo, setJobInfo] = useState({
     id: jobId,
-    title: jobTitle || "Job Position",
+    title: "Loading...",
     hasTest: false,
-    formLink: `${window.location.origin}/apply/${jobId}`,
+    formLink: "",
   })
 
-  // Fetch candidates using the hook
-  const { applications: candidates, loading, error } = useApplications(jobId)
+  // New state for CV preview modal
+  const [cvPreviewVisible, setCvPreviewVisible] = useState(false)
+  const [cvPreviewUrl, setCvPreviewUrl] = useState("")
 
-  // Set filtered candidates when candidates change
+  const { applications: candidates, loading, error } = useApplications(jobId)
+  const { jobs, loading: jobsLoading, error: jobsError } = useJobs()
+
+  // Existing useEffect hooks remain unchanged
   useEffect(() => {
     setFilteredCandidates(candidates)
   }, [candidates])
 
-  // Check if job has a test
   useEffect(() => {
-    const checkJobTest = async () => {
+    if (!jobId) return
+
+    const fetchJobData = async () => {
       try {
-        const response = await axiosInstance.get(`/api/v4/hr/hasTest/${jobId}`)
+        const testResponse = await axiosInstance.get(`/api/v4/hr/hasTest/${jobId}`)
+        const hasTest = testResponse.data.hasTest
+        const job = jobs.find((j) => j._id === jobId)
+        setJobInfo({
+          id: jobId,
+          title: job?.jobTitle || "Job Position",
+          hasTest: hasTest || false,
+          formLink: `${window.location.origin}/form/${job?.formId || jobId}`,
+        })
+      } catch (err) {
+        console.error("Error fetching job data or hasTest:", err)
         setJobInfo((prev) => ({
           ...prev,
-          hasTest: response.data.hasTest,
+          title: "Job Position",
+          hasTest: false,
+          formLink: `${window.location.origin}/form/${jobId}`,
         }))
-
-        console.log("Job test check response:", response.data);
-        
-      } catch (err) {
-        console.error("Error checking if job has test:", err)
       }
     }
 
-    if (jobId) {
-      checkJobTest()
+    if (!jobsLoading && jobs.length >= 0) {
+      fetchJobData()
     }
-  }, [jobId])
+  }, [jobId, jobs, jobsLoading])
 
-  // Apply filters
+  useEffect(() => {
+    console.log("Job Info:", jobInfo)
+  }, [jobInfo])
+
+  // Existing filter functions remain unchanged
   const applyFilters = () => {
     let filtered = [...candidates]
-
-    // Search text filter
     if (searchText) {
       const searchLower = searchText.toLowerCase()
       filtered = filtered.filter(
@@ -135,34 +144,25 @@ const CandidateListingScreen = ({ jobId, jobTitle }) => {
           (candidate.candidatePhone && candidate.candidatePhone.includes(searchText)),
       )
     }
-
-    // Status filter
     if (statusFilter.length > 0) {
       filtered = filtered.filter((candidate) => statusFilter.includes(candidate.status))
     }
-
-    // CV Score filter
     filtered = filtered.filter((candidate) => {
       const score = Number.parseInt(candidate.score) || 0
       return score >= cvScoreRange[0] && score <= cvScoreRange[1]
     })
-
-    // Date range filter - if we have applicationDate in the data
     if (dateRange && dateRange[0] && dateRange[1] && candidates.some((c) => c.applicationDate)) {
       const startDate = dateRange[0].startOf("day")
       const endDate = dateRange[1].endOf("day")
-
       filtered = filtered.filter((candidate) => {
         if (!candidate.applicationDate) return true
         const applicationDate = dayjs(candidate.applicationDate)
         return applicationDate.isAfter(startDate) && applicationDate.isBefore(endDate)
       })
     }
-
     setFilteredCandidates(filtered)
   }
 
-  // Reset filters
   const resetFilters = () => {
     setSearchText("")
     setStatusFilter([])
@@ -172,11 +172,10 @@ const CandidateListingScreen = ({ jobId, jobTitle }) => {
     setFilteredCandidates(candidates)
   }
 
-  // Fetch candidate details
   const fetchCandidateDetails = async (candidateId) => {
     setLoadingDetails(true)
     try {
-      const response = await axiosInstance.get(`/api/v4/hr/candidate/${candidateId}`)
+      const response = await axiosInstance.get(`/api/v4/candidate/${candidateId}`)
       setCandidateDetails(response.data)
     } catch (err) {
       message.error("Failed to load candidate details")
@@ -186,7 +185,7 @@ const CandidateListingScreen = ({ jobId, jobTitle }) => {
     }
   }
 
-  // Handle candidate action menu
+  // Modified handleMenuClick to handle CV preview
   const handleMenuClick = async (e, candidate) => {
     switch (e.key) {
       case "viewDetails":
@@ -195,28 +194,24 @@ const CandidateListingScreen = ({ jobId, jobTitle }) => {
         await fetchCandidateDetails(candidate._id)
         break
       case "viewCV":
-        message.info(`Viewing CV for ${candidate.name}`)
-        // In a real app, this would open the CV file
         if (candidate.cvFile) {
-          window.open(candidate.cvFile, "_blank")
+          setCvPreviewUrl(candidate.cvFile.url)
+          setCvPreviewVisible(true)
         } else {
           message.warning("CV file not available")
         }
         break
       case "changeStatus":
         message.info(`Change status for ${candidate.name}`)
-        // In a real app, this would open a modal to change status
         break
       case "sendEmail":
         message.info(`Send email to ${candidate.name}`)
-        // In a real app, this would open an email composition modal
         break
       default:
         break
     }
   }
 
-  // Handle copying form link
   const handleCopyFormLink = () => {
     navigator.clipboard
       .writeText(jobInfo.formLink)
@@ -228,7 +223,7 @@ const CandidateListingScreen = ({ jobId, jobTitle }) => {
       })
   }
 
-  // Define table columns
+  // Existing table columns remain unchanged
   const columns = [
     {
       title: "Candidate",
@@ -324,16 +319,16 @@ const CandidateListingScreen = ({ jobId, jobTitle }) => {
             label: "View CV",
             icon: <FileTextOutlined />,
           },
-          {
-            key: "changeStatus",
-            label: "Change Status",
-            icon: <CheckCircleOutlined />,
-          },
-          {
-            key: "sendEmail",
-            label: "Send Email",
-            icon: <MailOutlined />,
-          },
+          // {
+          //   key: "changeStatus",
+          //   label: "Change Status",
+          //   icon: <CheckCircleOutlined />,
+          // },
+          // {
+          //   key: "sendEmail",
+          //   label: "Send Email",
+          //   icon: <MailOutlined />,
+          // },
         ]
 
         return (
@@ -353,7 +348,7 @@ const CandidateListingScreen = ({ jobId, jobTitle }) => {
 
   return (
     <div className="candidate-listing-screen">
-      {/* Job Test Warning Banner */}
+      {/* Existing Alert and Card components remain unchanged */}
       {!jobInfo.hasTest && (
         <Alert
           message={
@@ -378,8 +373,11 @@ const CandidateListingScreen = ({ jobId, jobTitle }) => {
       <Card>
         <Row gutter={[16, 16]} align="middle">
           <Col xs={24} md={12}>
-            <Title level={4}>Candidates for {jobInfo.title}</Title>
+            <Title level={4}>
+              {jobsLoading ? "Loading job title..." : `Candidates for ${jobInfo.title}`}
+            </Title>
             {error && <Text type="danger">{error}</Text>}
+            {jobsError && <Text type="danger">{jobsError}</Text>}
           </Col>
           <Col xs={24} md={12} style={{ textAlign: "right" }}>
             <Space>
@@ -475,7 +473,7 @@ const CandidateListingScreen = ({ jobId, jobTitle }) => {
           columns={columns}
           dataSource={filteredCandidates}
           rowKey="_id"
-          loading={loading}
+          loading={loading || jobsLoading}
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
@@ -487,6 +485,38 @@ const CandidateListingScreen = ({ jobId, jobTitle }) => {
           }}
         />
       </Card>
+
+      {/* CV Preview Modal */}
+      <Modal
+        title="CV Preview"
+        open={cvPreviewVisible}
+        onCancel={() => setCvPreviewVisible(false)}
+        footer={[
+          <Button key="close" onClick={() => setCvPreviewVisible(false)}>
+            Close
+          </Button>,
+          <Button
+            key="download"
+            type="primary"
+            icon={<DownloadOutlined />}
+            onClick={() => window.open(cvPreviewUrl, "_blank")}
+          >
+            Download CV
+          </Button>,
+        ]}
+        width={800}
+        style={{ top: 20 }}
+      >
+        {cvPreviewUrl ? (
+          <iframe
+            src={cvPreviewUrl}
+            style={{ width: "100%", height: "600px", border: "none" }}
+            title="CV Preview"
+          />
+        ) : (
+          <Empty description="No CV available" />
+        )}
+      </Modal>
 
       {/* Candidate Details Drawer */}
       <Drawer
@@ -515,14 +545,12 @@ const CandidateListingScreen = ({ jobId, jobTitle }) => {
                 <Col span={16}>
                   <Text>{candidateDetails.candidateEmail}</Text>
                 </Col>
-
                 <Col span={8}>
                   <Text type="secondary">Phone:</Text>
                 </Col>
                 <Col span={16}>
                   <Text>{candidateDetails.candidatePhone}</Text>
                 </Col>
-
                 <Col span={8}>
                   <Text type="secondary">Applied on:</Text>
                 </Col>
@@ -628,7 +656,8 @@ const CandidateListingScreen = ({ jobId, jobTitle }) => {
                   icon={<FileTextOutlined />}
                   onClick={() => {
                     if (candidateDetails.cvFile) {
-                      window.open(candidateDetails.cvFile, "_blank")
+                      setCvPreviewUrl(candidateDetails.cvFile)
+                      setCvPreviewVisible(true)
                     } else {
                       message.warning("CV file not available")
                     }

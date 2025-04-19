@@ -6,6 +6,8 @@ import generateResponse from './gptService.js';
 import { generateTestToken } from './tokenService.js';
 
 export const evaluateCandidate = async (applicationId) => {
+    console.log('Evaluating candidate for application:', applicationId);
+    
     try {
         const application = await CandidateApplication.findById(applicationId)
             .populate('job');

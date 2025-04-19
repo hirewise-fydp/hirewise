@@ -34,6 +34,8 @@ export const extractTextFromFile = async (fileUrl, localFilePath = null) => {
       throw new ApiError(500, 'OCR failed to extract text from the file.');
     }
 
+    console.log('Extracted text form the extract test consoling to test:', response.data.text);
+
     return response.data.text;
   } catch (error) {
     if (error.code === 'ECONNREFUSED') {
