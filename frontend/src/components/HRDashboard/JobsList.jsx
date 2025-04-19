@@ -134,7 +134,7 @@ export default function JobsDashboard({ onManageJob }) {
   // Handle toggling job active status
   const handleToggleActive = async (jobId, currentStatus) => {
     try {
-      await axiosInstance.patch(`/api/v4/hr/job/${jobId}`, {
+      await axiosInstance.put(`/api/v4/hr/updateJob/${jobId}`, {
         isActive: !currentStatus,
       })
 
@@ -298,25 +298,25 @@ export default function JobsDashboard({ onManageJob }) {
             icon: <EyeOutlined />,
             onClick: () => navigate(`/jobs/${record._id}`),
           },
-          {
-            key: "edit",
-            label: "Edit Job",
-            icon: <EditOutlined />,
-            onClick: () => navigate(`/edit-job/${record._id}`),
-          },
-          {
-            type: "divider",
-          },
-          {
-            key: "delete",
-            label: "Delete Job",
-            icon: <DeleteOutlined />,
-            danger: true,
-            onClick: () => {
-              // Would typically show a confirmation modal here
-              console.log("Delete job:", record._id)
-            },
-          },
+          // {
+          //   key: "edit",
+          //   label: "Edit Job",
+          //   icon: <EditOutlined />,
+          //   onClick: () => navigate(`/edit-job/${record._id}`),
+          // },
+          // {
+          //   type: "divider",
+          // },
+          // {
+          //   key: "delete",
+          //   label: "Delete Job",
+          //   icon: <DeleteOutlined />,
+          //   danger: true,
+          //   onClick: () => {
+          //     // Would typically show a confirmation modal here
+          //     console.log("Delete job:", record._id)
+          //   },
+          // },
         ]
 
         return (
