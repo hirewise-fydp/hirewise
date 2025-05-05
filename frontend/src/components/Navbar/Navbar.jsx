@@ -63,10 +63,6 @@ const Navbar = () => {
           Hirewise
         </Link>
       </Title>
-      <Menu theme="dark" mode="horizontal" selectable={false} items={[
-        { key: "dashboard", label: <Link to="/hr/dashboard">Dashboard</Link> },
-        { key: "jobs", label: <Link to="/jobs">Jobs</Link> }
-      ]} />
       {user && (
         <Dropdown menu={profileMenu} trigger={["click"]}>
           <a onClick={(e) => e.preventDefault()}>

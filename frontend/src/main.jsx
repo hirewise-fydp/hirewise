@@ -7,17 +7,17 @@ import App from "./App";
 import AuthComponent from "./components/Auth/Auth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
-import CandidateForm from "./views/Candidate/CandidateForm";
 import "./index.css";
 import Navbar from "./components/Navbar/Navbar";
 import JobFormBuilder from "./views/Hr/JobFormBuilder/JobFormBuilder";
-import TestDataFormBuilder from "./views/Hr/testDataFormBuilder/TestDataFormBuilder";
-// import TestCreationPage from "./views/Hr/TestCreationPage/index";
-import PublicFormPage from "./views/Hr/PublicFormPage/PublicFormPage";
+import PublicFormPage from "./views/Candidate/CandidateFormPage";
 import CreateJobFormPage from "./views/Hr/CreateJobFormPage/CreateJobFormPage";
-import ConfirmationModal from "./views/Hr/hrConfirmationDialog/moduleTwoDataDialog"
 import TestCreationPage from "./views/Hr/TestCreationPage";
-import JobDetails from "./components/JobDetails";
+import JobDetails from "./views/Hr/JobDetails";
+
+import DashboardLayout from "./layouts/dashboard-layout";
+import JobsScreen from './views/Hr/jobs-screen'
+import ApplicantsScreen from "./views/Hr/applicants-screen"
 const MainLayout = () => {
   const location = useLocation();
   const hideNavbarRoutes = ["/"];
@@ -38,13 +38,17 @@ const MainLayout = () => {
 
         {/* Protected Routes (With Navbar) */}
         <Route
-          path="/home"
+          path="/dashboard"
           element={
             <ProtectedRoute>
-              <App />
+              <DashboardLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<JobsScreen />} />
+          <Route path="jobs" element={<JobsScreen />} />
+          <Route path="applicants/:jobId" element={<ApplicantsScreen />} />
+        </Route>
         <Route
           path="/create-job"
           element={
@@ -80,15 +84,7 @@ const MainLayout = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/create-test" element={<ProtectedRoute><TestCreationPage /></ProtectedRoute>} /> {/* New route */}
-        <Route
-          path="/test-confirmation-dialog"
-          element={
-            <ProtectedRoute>
-              <ConfirmationModal />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/create-test" element={<ProtectedRoute><TestCreationPage /></ProtectedRoute>} />
         <Route
           path="/test-data-module-two-form"
           element={

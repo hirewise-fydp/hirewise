@@ -1,40 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Table, Card, Button, Space, Tag, Dropdown, Typography, Row, Col, Progress, Empty, message, Alert } from "antd"
 import {
-  Table,
-  Card,
-  Input,
-  Button,
-  Select,
-  Slider,
-  DatePicker,
-  Space,
-  Tag,
-  Dropdown,
-  Typography,
-  Row,
-  Col,
-  Drawer,
-  Divider,
-  Progress,
-  Empty,
-  message,
-  Statistic,
-  Alert,
-  Spin,
-  Modal, // Add Modal to imports
-} from "antd"
-import {
-  SearchOutlined,
   FilterOutlined,
-  DownloadOutlined,
   FileTextOutlined,
   UserOutlined,
-  CheckCircleOutlined,
   MoreOutlined,
   ReloadOutlined,
-  MailOutlined,
   CopyOutlined,
   WarningOutlined,
 } from "@ant-design/icons"
@@ -42,12 +15,13 @@ import dayjs from "dayjs"
 import useApplications from "../../hooks/useApplications"
 import useJobs from "../../hooks/useJobs"
 import axiosInstance from "../../axios/AxiosInstance"
+import CandidateFilters from "./candidate-filters"
+import CandidateDetails from "./candidate-details"
+import CvPreview from "./cv-preview"
 
 const { Title, Text } = Typography
-const { RangePicker } = DatePicker
-const { Option } = Select
 
-// Status options and other constants remain unchanged
+// Status options and other constants
 const statusOptions = [
   { value: "cv_processing", label: "CV Processing" },
   { value: "cv_screened", label: "CV Screened" },
@@ -66,8 +40,8 @@ const statusColors = {
   hired: "success",
 }
 
-const CandidateListingScreen = ({ jobId }) => {
-  // Existing state variables
+const CandidateList = ({ jobId, onBack }) => {
+  // State variables
   const [searchText, setSearchText] = useState("")
   const [statusFilter, setStatusFilter] = useState([])
   const [cvScoreRange, setCvScoreRange] = useState([0, 100])
@@ -79,6 +53,8 @@ const CandidateListingScreen = ({ jobId }) => {
   const [selectedCandidate, setSelectedCandidate] = useState(null)
   const [candidateDetails, setCandidateDetails] = useState(null)
   const [loadingDetails, setLoadingDetails] = useState(false)
+  const [cvPreviewVisible, setCvPreviewVisible] = useState(false)
+  const [cvPreviewUrl, setCvPreviewUrl] = useState("")
   const [jobInfo, setJobInfo] = useState({
     id: jobId,
     title: "Loading...",
@@ -86,18 +62,15 @@ const CandidateListingScreen = ({ jobId }) => {
     formLink: "",
   })
 
-  // New state for CV preview modal
-  const [cvPreviewVisible, setCvPreviewVisible] = useState(false)
-  const [cvPreviewUrl, setCvPreviewUrl] = useState("")
-
   const { applications: candidates, loading, error } = useApplications(jobId)
   const { jobs, loading: jobsLoading, error: jobsError } = useJobs()
 
-  // Existing useEffect hooks remain unchanged
+  // Initialize filtered candidates
   useEffect(() => {
     setFilteredCandidates(candidates)
   }, [candidates])
 
+  // Fetch job data
   useEffect(() => {
     if (!jobId) return
 
@@ -106,6 +79,7 @@ const CandidateListingScreen = ({ jobId }) => {
         const testResponse = await axiosInstance.get(`/api/v4/hr/hasTest/${jobId}`)
         const hasTest = testResponse.data.hasTest
         const job = jobs.find((j) => j._id === jobId)
+        console.log("job data:", job)
         setJobInfo({
           id: jobId,
           title: job?.jobTitle || "Job Position",
@@ -128,11 +102,7 @@ const CandidateListingScreen = ({ jobId }) => {
     }
   }, [jobId, jobs, jobsLoading])
 
-  useEffect(() => {
-    console.log("Job Info:", jobInfo)
-  }, [jobInfo])
-
-  // Existing filter functions remain unchanged
+  // Apply filters
   const applyFilters = () => {
     let filtered = [...candidates]
     if (searchText) {
@@ -163,6 +133,7 @@ const CandidateListingScreen = ({ jobId }) => {
     setFilteredCandidates(filtered)
   }
 
+  // Reset filters
   const resetFilters = () => {
     setSearchText("")
     setStatusFilter([])
@@ -172,6 +143,7 @@ const CandidateListingScreen = ({ jobId }) => {
     setFilteredCandidates(candidates)
   }
 
+  // Fetch candidate details
   const fetchCandidateDetails = async (candidateId) => {
     setLoadingDetails(true)
     try {
@@ -185,7 +157,7 @@ const CandidateListingScreen = ({ jobId }) => {
     }
   }
 
-  // Modified handleMenuClick to handle CV preview
+  // Handle menu actions
   const handleMenuClick = async (e, candidate) => {
     switch (e.key) {
       case "viewDetails":
@@ -213,6 +185,7 @@ const CandidateListingScreen = ({ jobId }) => {
   }
 
   const handleCopyFormLink = () => {
+    console.log("copy link console i here")
     navigator.clipboard
       .writeText(jobInfo.formLink)
       .then(() => {
@@ -223,7 +196,7 @@ const CandidateListingScreen = ({ jobId }) => {
       })
   }
 
-  // Existing table columns remain unchanged
+  // Table columns
   const columns = [
     {
       title: "Candidate",
@@ -319,16 +292,6 @@ const CandidateListingScreen = ({ jobId }) => {
             label: "View CV",
             icon: <FileTextOutlined />,
           },
-          // {
-          //   key: "changeStatus",
-          //   label: "Change Status",
-          //   icon: <CheckCircleOutlined />,
-          // },
-          // {
-          //   key: "sendEmail",
-          //   label: "Send Email",
-          //   icon: <MailOutlined />,
-          // },
         ]
 
         return (
@@ -348,7 +311,6 @@ const CandidateListingScreen = ({ jobId }) => {
 
   return (
     <div className="candidate-listing-screen">
-      {/* Existing Alert and Card components remain unchanged */}
       {!jobInfo.hasTest && (
         <Alert
           message={
@@ -359,9 +321,9 @@ const CandidateListingScreen = ({ jobId }) => {
                   No test has been created for this job position. Candidates cannot be fully evaluated without a test.
                 </span>
               </div>
-              <Button icon={<CopyOutlined />} onClick={handleCopyFormLink}>
+              {/* <Button icon={<CopyOutlined />} onClick={handleCopyFormLink}>
                 Copy Form Link
-              </Button>
+              </Button> */}  
             </div>
           }
           type="warning"
@@ -373,9 +335,7 @@ const CandidateListingScreen = ({ jobId }) => {
       <Card>
         <Row gutter={[16, 16]} align="middle">
           <Col xs={24} md={12}>
-            <Title level={4}>
-              {jobsLoading ? "Loading job title..." : `Candidates for ${jobInfo.title}`}
-            </Title>
+            <Title level={4}>{jobsLoading ? "Loading job title..." : `Candidates for ${jobInfo.title}`}</Title>
             {error && <Text type="danger">{error}</Text>}
             {jobsError && <Text type="danger">{jobsError}</Text>}
           </Col>
@@ -394,79 +354,26 @@ const CandidateListingScreen = ({ jobId }) => {
               <Button icon={<ReloadOutlined />} onClick={resetFilters}>
                 Reset
               </Button>
+              {onBack && <Button onClick={onBack}>Back to Jobs</Button>}
             </Space>
           </Col>
         </Row>
 
         {showFilters && (
-          <Card style={{ marginTop: 16, marginBottom: 16 }} bordered={false} className="filter-card">
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={8}>
-                <div className="filter-item">
-                  <Text strong>Search</Text>
-                  <Input
-                    placeholder="Search by name, email or phone"
-                    prefix={<SearchOutlined />}
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    allowClear
-                  />
-                </div>
-              </Col>
-              <Col xs={24} md={8}>
-                <div className="filter-item">
-                  <Text strong>Status</Text>
-                  <Select
-                    mode="multiple"
-                    placeholder="Filter by status"
-                    value={statusFilter}
-                    onChange={setStatusFilter}
-                    style={{ width: "100%" }}
-                    allowClear
-                  >
-                    {statusOptions.map((option) => (
-                      <Option key={option.value} value={option.value}>
-                        {option.label}
-                      </Option>
-                    ))}
-                  </Select>
-                </div>
-              </Col>
-              <Col xs={24} md={8}>
-                <div className="filter-item">
-                  <Text strong>Application Date</Text>
-                  <RangePicker style={{ width: "100%" }} value={dateRange} onChange={(dates) => setDateRange(dates)} />
-                </div>
-              </Col>
-              <Col xs={24} md={12}>
-                <div className="filter-item">
-                  <Text strong>
-                    CV Score Range: {cvScoreRange[0]} - {cvScoreRange[1]}
-                  </Text>
-                  <Slider range min={0} max={100} value={cvScoreRange} onChange={(value) => setCvScoreRange(value)} />
-                </div>
-              </Col>
-              <Col xs={24} md={12}>
-                <div className="filter-item">
-                  <Text strong>
-                    Test Score Range: {testScoreRange[0]} - {testScoreRange[1]}
-                  </Text>
-                  <Slider
-                    range
-                    min={0}
-                    max={100}
-                    value={testScoreRange}
-                    onChange={(value) => setTestScoreRange(value)}
-                  />
-                </div>
-              </Col>
-              <Col xs={24} style={{ textAlign: "right" }}>
-                <Button type="primary" onClick={applyFilters}>
-                  Apply Filters
-                </Button>
-              </Col>
-            </Row>
-          </Card>
+          <CandidateFilters
+            searchText={searchText}
+            setSearchText={setSearchText}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            cvScoreRange={cvScoreRange}
+            setCvScoreRange={setCvScoreRange}
+            testScoreRange={testScoreRange}
+            setTestScoreRange={setTestScoreRange}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            applyFilters={applyFilters}
+            statusOptions={statusOptions}
+          />
         )}
 
         <Table
@@ -487,195 +394,25 @@ const CandidateListingScreen = ({ jobId }) => {
       </Card>
 
       {/* CV Preview Modal */}
-      <Modal
-        title="CV Preview"
-        open={cvPreviewVisible}
-        onCancel={() => setCvPreviewVisible(false)}
-        footer={[
-          <Button key="close" onClick={() => setCvPreviewVisible(false)}>
-            Close
-          </Button>,
-          <Button
-            key="download"
-            type="primary"
-            icon={<DownloadOutlined />}
-            onClick={() => window.open(cvPreviewUrl, "_blank")}
-          >
-            Download CV
-          </Button>,
-        ]}
-        width={800}
-        style={{ top: 20 }}
-      >
-        {cvPreviewUrl ? (
-          <iframe
-            src={cvPreviewUrl}
-            style={{ width: "100%", height: "600px", border: "none" }}
-            title="CV Preview"
-          />
-        ) : (
-          <Empty description="No CV available" />
-        )}
-      </Modal>
+      <CvPreview visible={cvPreviewVisible} url={cvPreviewUrl} onClose={() => setCvPreviewVisible(false)} />
 
       {/* Candidate Details Drawer */}
-      <Drawer
-        title={selectedCandidate?.name}
-        placement="right"
-        width={600}
+      <CandidateDetails
+        visible={detailsVisible}
+        candidate={selectedCandidate}
+        details={candidateDetails}
+        loading={loadingDetails}
         onClose={() => {
           setDetailsVisible(false)
           setCandidateDetails(null)
         }}
-        open={detailsVisible}
-      >
-        {loadingDetails ? (
-          <div style={{ textAlign: "center", padding: "40px 0" }}>
-            <Spin size="large" />
-            <div style={{ marginTop: 16 }}>Loading candidate details...</div>
-          </div>
-        ) : candidateDetails ? (
-          <div className="candidate-details">
-            <section>
-              <Title level={5}>Contact Information</Title>
-              <Row gutter={[16, 8]}>
-                <Col span={8}>
-                  <Text type="secondary">Email:</Text>
-                </Col>
-                <Col span={16}>
-                  <Text>{candidateDetails.candidateEmail}</Text>
-                </Col>
-                <Col span={8}>
-                  <Text type="secondary">Phone:</Text>
-                </Col>
-                <Col span={16}>
-                  <Text>{candidateDetails.candidatePhone}</Text>
-                </Col>
-                <Col span={8}>
-                  <Text type="secondary">Applied on:</Text>
-                </Col>
-                <Col span={16}>
-                  <Text>
-                    {candidateDetails.applicationDate
-                      ? dayjs(candidateDetails.applicationDate).format("MMMM D, YYYY")
-                      : "N/A"}
-                  </Text>
-                </Col>
-              </Row>
-            </section>
-
-            <Divider />
-
-            <section>
-              <Title level={5}>Evaluation Results</Title>
-              <Row gutter={[16, 16]}>
-                <Col span={12}>
-                  <Card size="small" title="CV Score">
-                    <Progress
-                      type="circle"
-                      percent={Number.parseInt(candidateDetails.cvScore) || 0}
-                      status={
-                        Number.parseInt(candidateDetails.cvScore) >= 70
-                          ? "success"
-                          : Number.parseInt(candidateDetails.cvScore) >= 40
-                            ? "normal"
-                            : "exception"
-                      }
-                    />
-                  </Card>
-                </Col>
-                <Col span={12}>
-                  <Card size="small" title="Test Score">
-                    {candidateDetails.testScore ? (
-                      <Progress
-                        type="circle"
-                        percent={Number.parseInt(candidateDetails.testScore)}
-                        status={
-                          Number.parseInt(candidateDetails.testScore) >= 70
-                            ? "success"
-                            : Number.parseInt(candidateDetails.testScore) >= 40
-                              ? "normal"
-                              : "exception"
-                        }
-                      />
-                    ) : (
-                      <Empty description="Test not taken" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-                    )}
-                  </Card>
-                </Col>
-              </Row>
-
-              {candidateDetails.evaluationResults?.skillMatches && (
-                <div style={{ marginTop: 16 }}>
-                  <Text strong>Skill Matches</Text>
-                  <Row gutter={[16, 8]} style={{ marginTop: 8 }}>
-                    {candidateDetails.evaluationResults.skillMatches.map((skill, index) => (
-                      <Col span={8} key={index}>
-                        <Card size="small" title={skill.skill}>
-                          <Progress percent={skill.matchStrength} size="small" />
-                        </Card>
-                      </Col>
-                    ))}
-                  </Row>
-                </div>
-              )}
-
-              {candidateDetails.evaluationResults && (
-                <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-                  <Col span={8}>
-                    <Statistic
-                      title="Experience Score"
-                      value={candidateDetails.evaluationResults.experienceScore || 0}
-                      suffix="/ 100"
-                    />
-                  </Col>
-                  <Col span={8}>
-                    <Statistic
-                      title="Education Score"
-                      value={candidateDetails.evaluationResults.educationScore || 0}
-                      suffix="/ 100"
-                    />
-                  </Col>
-                  <Col span={8}>
-                    <Statistic
-                      title="Overall Score"
-                      value={candidateDetails.evaluationResults.overallScore || 0}
-                      suffix="/ 100"
-                    />
-                  </Col>
-                </Row>
-              )}
-            </section>
-
-            <Divider />
-
-            <section>
-              <Space>
-                <Button
-                  type="primary"
-                  icon={<FileTextOutlined />}
-                  onClick={() => {
-                    if (candidateDetails.cvFile) {
-                      setCvPreviewUrl(candidateDetails.cvFile)
-                      setCvPreviewVisible(true)
-                    } else {
-                      message.warning("CV file not available")
-                    }
-                  }}
-                >
-                  View CV
-                </Button>
-                <Button icon={<DownloadOutlined />}>Download CV</Button>
-                <Button icon={<MailOutlined />}>Send Email</Button>
-              </Space>
-            </section>
-          </div>
-        ) : (
-          <Empty description="No candidate details available" />
-        )}
-      </Drawer>
+        onViewCV={(url) => {
+          setCvPreviewUrl(url)
+          setCvPreviewVisible(true)
+        }}
+      />
     </div>
   )
 }
 
-export default CandidateListingScreen
+export default CandidateList

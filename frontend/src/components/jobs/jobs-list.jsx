@@ -5,16 +5,10 @@ import {
   Button,
   Card,
   Table,
-  Input,
   Space,
   Tag,
   Dropdown,
-  Row,
-  Col,
-  Statistic,
   Badge,
-  Select,
-  DatePicker,
   Tooltip,
   Empty,
   Alert,
@@ -24,19 +18,11 @@ import {
 } from "antd"
 import {
   PlusOutlined,
-  SearchOutlined,
   EllipsisOutlined,
   ReloadOutlined,
   EyeOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  UserOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
   FilterOutlined,
-  BarChartOutlined,
   FileTextOutlined,
-  CalendarOutlined,
   TeamOutlined,
   FormOutlined,
 } from "@ant-design/icons"
@@ -45,12 +31,12 @@ import useJobs from "../../hooks/useJobs"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import axiosInstance from "../../axios/AxiosInstance"
+import JobsMetrics from "./jobs-metrics"
+import JobsFilters from "./jobs-filters"
 
 dayjs.extend(relativeTime)
 
 const { Title, Text } = Typography
-const { RangePicker } = DatePicker
-const { Option } = Select
 
 // Status colors mapping
 const statusColors = {
@@ -60,7 +46,7 @@ const statusColors = {
   retrying: "blue",
 }
 
-export default function JobsDashboard({ onManageJob }) {
+export default function JobsList({ onManageJob }) {
   const { jobs, setJobs, loading } = useJobs()
   const navigate = useNavigate()
 
@@ -298,25 +284,6 @@ export default function JobsDashboard({ onManageJob }) {
             icon: <EyeOutlined />,
             onClick: () => navigate(`/jobs/${record._id}`),
           },
-          // {
-          //   key: "edit",
-          //   label: "Edit Job",
-          //   icon: <EditOutlined />,
-          //   onClick: () => navigate(`/edit-job/${record._id}`),
-          // },
-          // {
-          //   type: "divider",
-          // },
-          // {
-          //   key: "delete",
-          //   label: "Delete Job",
-          //   icon: <DeleteOutlined />,
-          //   danger: true,
-          //   onClick: () => {
-          //     // Would typically show a confirmation modal here
-          //     console.log("Delete job:", record._id)
-          //   },
-          // },
         ]
 
         return (
@@ -342,58 +309,7 @@ export default function JobsDashboard({ onManageJob }) {
       )}
 
       {/* Dashboard Metrics */}
-      <Row gutter={[16, 16]} className="dashboard-metrics">
-        <Col xs={24} sm={12} md={8} lg={4}>
-          <Card>
-            <Statistic title="Total Jobs" value={metrics.totalJobs} prefix={<BarChartOutlined />} />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={8} lg={4}>
-          <Card>
-            <Statistic
-              title="Active Jobs"
-              value={metrics.activeJobs}
-              prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: "#52c41a" }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={8} lg={4}>
-          <Card>
-            <Statistic
-              title="Pending Jobs"
-              value={metrics.pendingJobs}
-              prefix={<CalendarOutlined />}
-              valueStyle={{ color: "#faad14" }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={8} lg={4}>
-          <Card>
-            <Statistic
-              title="Completed Jobs"
-              value={metrics.completedJobs}
-              prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: "#52c41a" }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={8} lg={4}>
-          <Card>
-            <Statistic
-              title="Failed Jobs"
-              value={metrics.failedJobs}
-              prefix={<CloseCircleOutlined />}
-              valueStyle={{ color: "#f5222d" }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={8} lg={4}>
-          <Card>
-            <Statistic title="Total Candidates" value={metrics.totalCandidates} prefix={<UserOutlined />} />
-          </Card>
-        </Col>
-      </Row>
+      <JobsMetrics metrics={metrics} />
 
       <Divider />
 
@@ -420,57 +336,16 @@ export default function JobsDashboard({ onManageJob }) {
       >
         {/* Filters Section */}
         {showFilters && (
-          <div
-            className="filters-section"
-            style={{ marginBottom: 16, padding: 16, background: "#f9f9f9", borderRadius: 4 }}
-          >
-            <Row gutter={[16, 16]} align="bottom">
-              <Col xs={24} md={8}>
-                <div>
-                  <Text strong>Search</Text>
-                  <Input
-                    placeholder="Search by job title or location"
-                    prefix={<SearchOutlined />}
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    allowClear
-                  />
-                </div>
-              </Col>
-              <Col xs={24} md={8}>
-                <div>
-                  <Text strong>Status</Text>
-                  <Select
-                    mode="multiple"
-                    placeholder="Filter by status"
-                    value={statusFilter}
-                    onChange={setStatusFilter}
-                    style={{ width: "100%" }}
-                    allowClear
-                  >
-                    <Option value="pending">Pending</Option>
-                    <Option value="completed">Completed</Option>
-                    <Option value="failed">Failed</Option>
-                    <Option value="retrying">Retrying</Option>
-                  </Select>
-                </div>
-              </Col>
-              <Col xs={24} md={8}>
-                <div>
-                  <Text strong>Created Date</Text>
-                  <RangePicker style={{ width: "100%" }} value={dateRange} onChange={(dates) => setDateRange(dates)} />
-                </div>
-              </Col>
-              <Col xs={24} style={{ textAlign: "right" }}>
-                <Space>
-                  <Button onClick={resetFilters}>Reset</Button>
-                  <Button type="primary" onClick={applyFilters}>
-                    Apply Filters
-                  </Button>
-                </Space>
-              </Col>
-            </Row>
-          </div>
+          <JobsFilters
+            searchText={searchText}
+            setSearchText={setSearchText}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            applyFilters={applyFilters}
+            resetFilters={resetFilters}
+          />
         )}
 
         {/* Jobs Table */}

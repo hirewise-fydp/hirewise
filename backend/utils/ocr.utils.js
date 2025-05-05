@@ -10,7 +10,7 @@ export const extractTextFromFile = async (fileUrl, localFilePath = null) => {
     if (fileUrl && fileUrl.includes('cloudinary')) {
       // Send the URL in a JSON payload
       response = await axios.post(
-        'http://127.0.0.1:5001/extract-text',
+        'http://192.168.18.188:5001/extract-text',
         { image_url: fileUrl },
         {
           headers: { 'Content-Type': 'application/json' },

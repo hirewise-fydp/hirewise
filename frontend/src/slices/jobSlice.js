@@ -12,7 +12,6 @@ export const processJobDescription = createAsyncThunk(
   'job/processJobDescription',
   async (formData, { rejectWithValue }) => {
     try {
-      console.log("form data :", formData)
       const response = await axiosInstance.post(
         'http://localhost:5000/api/v4/hr/process-jd',
         formData,

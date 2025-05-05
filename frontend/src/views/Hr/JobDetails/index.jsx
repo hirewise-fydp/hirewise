@@ -15,8 +15,7 @@ import {
   message, // Import message from antd
 } from "antd"
 import { FormOutlined, UserOutlined, FileTextOutlined, CopyOutlined, WarningOutlined } from "@ant-design/icons"
-import axiosInstance from "../../axios/AxiosInstance"
-import CandidateListingScreen from "../HRDashboard/ApplicationsView"
+import axiosInstance from "../../../axios/AxiosInstance"
 
 const { Title, Text } = Typography
 const { TabPane } = Tabs
@@ -33,6 +32,7 @@ const JobDetails = () => {
       try {
         setLoading(true)
         const response = await axiosInstance.get(`/api/v4/hr/findJd/${jobId}`)
+        console.log("respons is here", response.data)
         setJobDetails(response.data)
       } catch (err) {
         setError("Failed to load job details")
@@ -52,7 +52,8 @@ const JobDetails = () => {
   }
 
   const handleCopyFormLink = () => {
-    const formLink = `${window.location.origin}/apply/${jobId}`
+    console.log('form details:' , jobDetails)
+    const formLink = `${window.location.origin}/form/${jobDetails.formId}`
     navigator.clipboard
       .writeText(formLink)
       .then(() => {
@@ -93,7 +94,7 @@ const JobDetails = () => {
           </div>
           <Space>
             <Button icon={<CopyOutlined />} onClick={handleCopyFormLink}>
-              Copy Form Link
+              Copy Form Link 
             </Button>
             {!jobDetails?.testCreated ? (
               <Button type="primary" icon={<FormOutlined />} onClick={handleCreateTest} size="large">
@@ -133,16 +134,6 @@ const JobDetails = () => {
         )}
 
         <Tabs defaultActiveKey="candidates">
-          <TabPane
-            tab={
-              <span>
-                <UserOutlined /> Candidates
-              </span>
-            }
-            key="candidates"
-          >
-            <CandidateListingScreen jobId={jobId} jobTitle={jobDetails?.jobTitle} />
-          </TabPane>
           <TabPane
             tab={
               <span>

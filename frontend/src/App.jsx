@@ -2,7 +2,6 @@ import React from 'react'
 import { Button } from 'antd'
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import HRDashboard from './views/Hr/HrDashboard/index';
 
 
 
@@ -13,7 +12,7 @@ const App = () => {
 
   return (
     <div className="App">
-      <HRDashboard />
+      
     </div>
   )
 }

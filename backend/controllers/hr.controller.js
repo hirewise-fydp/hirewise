@@ -179,24 +179,32 @@ export const retryJob = async (req, res) => {
 export const getJobDescriptionById = async (req, res) => {
   try {
     console.log('Request received to fetch Job Description');
-
+  
     const { id } = req.params;
     console.log('ID:', id);
-
+  
     if (!id) {
       return res.status(400).json({ message: 'Job ID is required' });
     }
-
-    const jobDescription = await JobDescription.findById(id);
+  
+    const jobDescription = await JobDescription.findById(id).lean(); // Use lean() to get plain JS object
     if (!jobDescription) {
       return res.status(404).json({ message: 'Job Description not found' });
     }
-
+  
+    const form = await Form.findOne({ job: id }, '_id');
+    const formId = form ? form._id : null;
+  
+    // Add formId as a property inside the jobDescription object
+    jobDescription.formId = formId;
+  
     res.status(200).json(jobDescription);
   } catch (error) {
     console.error('Error fetching job description:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
+  
+  
 };
 
 // export const findAllJobDescription = async (req, res) => {

@@ -23,7 +23,7 @@ const AuthComponent = () => {
         const result = await dispatch(login(values));
         if (result.type === "auth/login/fulfilled") {
           message.success("Login successful!");
-          navigate('/home')
+          navigate('/dashboard')
     
         } else {
           message.error("Login failed");
