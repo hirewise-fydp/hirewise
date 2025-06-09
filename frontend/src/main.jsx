@@ -21,11 +21,14 @@ import JobsScreen from './views/Hr/jobs-screen'
 import ApplicantsScreen from "./views/Hr/applicants-screen"
 const MainLayout = () => {
   const location = useLocation();
-  const hideNavbarRoutes = ["/"];
+  const hideNavbarRoutes = ["/", "/form/:formId"];
 
   return (
     <>
-      {!hideNavbarRoutes.includes(location.pathname) && <Navbar />}
+      {!hideNavbarRoutes.some(route => 
+        route === location.pathname || 
+        (route.includes(":formId") && location.pathname.startsWith("/form/"))
+      ) && <Navbar />}
       <Routes>
         {/* Public Route (Only accessible if not logged in) */}
         <Route

@@ -8,7 +8,7 @@ router.post('/createForm', createForm);
 router.get('/getForm/:formId', getFormById);
 router.post('/process-jd', upload.single('image'), processJd);
 router.get('/findJd/:id', getJobDescriptionById);
-router.get('/findAll', findAllJobDescription);
+router.get('/findAll/:id', findAllJobDescription);
 router.post("/tests/manual", createManualTest);
 router.post("/tests/ai/generate", generateAITestQuestions);
 router.post("/tests/ai/save", saveAITest);
