@@ -30,7 +30,7 @@ export const evaluateCandidate = async (applicationId) => {
             educationScore: evaluationResults.educationScore || 0,
             overallScore: evaluationResults.overallScore || 0
         };
-        if (application.cvScore >= 10) {
+        if (application.cvScore >= 75) {
             application.status = "test_invited";
             application.testToken = generateTestToken(application._id);
             application.testTokenExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -124,7 +124,7 @@ export const evaluateTestAnswers = async (applicationId) => {
             { answers: application.testAnswers }
         );
 
-        // Update application with test score
+        
         application.testScore = evaluation.testScore || 0;
         application.evaluationResults.feedback = evaluation.feedback || '';
         application.markModified('evaluationResults');
@@ -157,6 +157,8 @@ export const evaluateTestAnswers = async (applicationId) => {
 };
 
 async function calculateScores(parsedResume, job) {
+
+    
     const input = {
         cv: parsedResume,
         jd: job
@@ -168,9 +170,9 @@ async function calculateScores(parsedResume, job) {
         input
     );
 
-    console.log('Raw evaluation from GPT:', JSON.stringify(evaluation.evaluationResults.skillMatches));
+    
 
-    // Transform evaluation to match schema
+    
     const formattedEvaluation = {
         cvScore: evaluation.cvScore || 0,
         skillMatches: (evaluation.evaluationResults.skillMatches || []).map(skill => ({

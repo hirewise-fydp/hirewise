@@ -96,6 +96,18 @@ const jobDescriptionSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    evaluationConfig: {
+      skills: { type: Number, default: 0 },
+      experience: { type: Number, default: 0 },
+      education: { type: Number, default: 0 },
+      certifications: { type: Number, default: 0 },
+    },
+    customParameters: [
+      {
+        key: { type: String },
+        value: { type: Schema.Types.Mixed },
+      },
+    ],
   },
   { timestamps: true }
 );

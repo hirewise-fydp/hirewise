@@ -51,16 +51,8 @@ export const validateJobSchema = (data) => {
 };
 
 export const processJd = async (req, res) => {
-  console.log(req.body);
-  const {
-    title,
-    modules,
-    jobType,
-    Location,
-    startDate,
-    endDate,
-    employmentType,
-  } = req.body;
+  console.log('process JD request body', req.body)
+  const { title, modules, jobType ,jobLocation, startDate, endDate,   employmentType, evaluationConfig,customParameters } = req.body;
   const { accessToken } = req.cookies;
   console.log("location job:", Location)
 
@@ -85,6 +77,28 @@ export const processJd = async (req, res) => {
       throw new ApiError(500, "Failed to upload file to Cloudinary");
     }
 
+    
+    let parsedEvaluationConfig = {};
+    let parsedCustomParameters = [];
+    try {
+      if (evaluationConfig) {
+        parsedEvaluationConfig = JSON.parse(evaluationConfig);
+      }
+      if (customParameters) {
+        const rawCustomParameters = JSON.parse(customParameters);
+        
+        parsedCustomParameters = rawCustomParameters.map(param => {
+          const [key, value] = Object.entries(param)[0]; 
+          if (!key || value === undefined) {
+            throw new Error('Each custom parameter must have a key and value');
+          }
+          return { key, value };
+        });
+      }
+    } catch (error) {
+      throw new ApiError(400, `Invalid JSON format for evaluationConfig or customParameters: ${error.message}`);
+    }
+
     const newJob = await JobDescription.create({
       userId: decoded._id,
       jobTitle: title,
@@ -102,7 +116,13 @@ export const processJd = async (req, res) => {
         publicId: cloudinaryResult.publicId,
         format: cloudinaryResult.format,
       },
-
+      evaluationConfig: {
+        skills: parsedEvaluationConfig.skills || 0,
+        experience: parsedEvaluationConfig.experience || 0,
+        education: parsedEvaluationConfig.education || 0,
+        certifications: parsedEvaluationConfig.certifications || 0,
+      },
+      customParameters: parsedCustomParameters,
     });
 
     await addJobToQueue(cloudinaryResult.url, newJob._id);
