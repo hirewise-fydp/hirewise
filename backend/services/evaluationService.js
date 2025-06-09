@@ -79,6 +79,81 @@ export const evaluateCandidate = async (applicationId) => {
         throw error;
     }
 };
+export const evaluateTestAnswers = async (applicationId) => {
+    console.log('Evaluating test answers for application:', applicationId);
+
+    try {
+        const application = await CandidateApplication.findById(applicationId)
+            .populate('job');
+        
+        if (!application) {
+            throw new Error('Application not found');
+        }
+
+        const test = await Test.findOne({ job: application.job._id });
+        if (!test) {
+            throw new Error('Test not found for this job');
+        }
+
+        const systemInstructions = `
+            You are an expert in evaluating candidate test responses for job assessments. Your task is to evaluate the provided answers against the correct answers and provide a score and detailed feedback.
+            Return a JSON object with:
+            - testScore: A number out of 100 representing the percentage of correct answers.
+            - feedback: A detailed textual report explaining the performance, highlighting strengths, weaknesses, and areas for improvement.
+        `;
+
+        const taskInstructions = `
+            Evaluate the following candidate answers for the test associated with the job "${application.job.jobTitle}".
+            The answers are provided as an array of objects, each containing:
+            - questionNumber: The question number (1-based index).
+            - questionText: The text of the question.
+            - selectedOption: The candidate's selected answer.
+            - correctAnswer: The correct answer.
+            - isCorrect: A boolean indicating if the selected answer is correct.
+            Calculate the test score as the percentage of correct answers.
+            Provide a detailed feedback report in plain language, structured for readability, covering:
+            - Overall performance summary.
+            - Specific questions where the candidate performed well or poorly.
+            - Recommendations for improvement.
+        `;
+
+        const evaluation = await generateResponse(
+            systemInstructions,
+            taskInstructions,
+            { answers: application.testAnswers }
+        );
+
+        // Update application with test score
+        application.testScore = evaluation.testScore || 0;
+        application.evaluationResults.feedback = evaluation.feedback || '';
+        application.markModified('evaluationResults');
+        await application.save();
+
+        console.log(`Test evaluation completed for application ${applicationId}: Score ${evaluation.testScore}`);
+
+    } catch (error) {
+        console.error('Test evaluation failed for application', applicationId, error);
+        await CandidateApplication.findByIdAndUpdate(applicationId, {
+            status: 'evaluation_failed',
+            error: error.message
+        });
+        const application = await CandidateApplication.findById(applicationId).populate('job');
+        if (application) {
+            try {
+                await sendEvaluationFailureEmail({
+                    email: application.candidateEmail,
+                    candidateName: application.candidateName,
+                    jobTitle: application.job?.jobTitle || 'Unknown Job',
+                    applicationId: application._id.toString(),
+                    errorMessage: error.message
+                });
+            } catch (emailError) {
+                console.error(`Failed to send evaluation failure email to ${application.candidateEmail}:`, emailError);
+            }
+        }
+        throw error;
+    }
+};
 
 async function calculateScores(parsedResume, job) {
     const input = {

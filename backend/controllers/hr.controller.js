@@ -11,6 +11,7 @@ import { ocrQueue } from '../Queue/Queue.js';
 import { CandidateApplication } from '../models/candidate.model.js';
 import { Test } from "../models/test.model.js"; // Adjust path to your Test model
 import generateResponse from "../services/gptService.js"; // Adjust path to your GPT service
+import { resendTestInvitation } from './test.controller.js';
 import mongoose from 'mongoose';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -38,7 +39,7 @@ const validateFile = (file) => {
 
 
 export const validateJobSchema = (data) => {
-  const requiredFields = ['jobSummary', 'keyResponsibilities', 'qualifications', 'location', 'applicationProcess'];
+  const requiredFields = ['jobSummary', 'keyResponsibilities', 'qualifications', 'location'];
   return requiredFields.every((field) => data[field] !== undefined);
 };
 
