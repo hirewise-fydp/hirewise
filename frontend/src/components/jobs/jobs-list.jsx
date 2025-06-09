@@ -264,7 +264,7 @@ export default function JobsList({ onManageJob }) {
       dataIndex: "isActive",
       key: "isActive",
       render: (isActive, record) => (
-        <Switch checked={isActive} onChange={() => handleToggleActive(record._id, isActive)} size="small" />
+        <Switch checked={isActive} disabled={record.jobExpired} onChange={() => handleToggleActive(record._id, isActive)} size="small" />
       ),
     },
     {

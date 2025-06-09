@@ -16,15 +16,15 @@ const jobDescriptionSchema = new Schema(
       type: String,
       required: true,
     },
+    activeDuration: { startDate: { type: String }, endDate: { type: String } },
     jobType: {
       type: String,
       required: true,
     },
-    
-    employmentType:{
-       type: String,
+
+    employmentType: {
+      type: String,
       required: true,
-      
     },
     jobSummary: {
       type: String,
@@ -91,6 +91,11 @@ const jobDescriptionSchema = new Schema(
       type: Boolean,
       // default: true
     },
+    jobExpired:{
+      type: Boolean,
+      default : false
+
+    },
     testCreated: {
       type: Boolean,
       default: false,
@@ -100,6 +105,13 @@ const jobDescriptionSchema = new Schema(
 );
 jobDescriptionSchema.index({ jobType: 1 });
 jobDescriptionSchema.index({ employmentType: 1 });
+jobDescriptionSchema.pre('save', function (next) {
+  if (this.activeDuration?.endDate) {
+    const currentDate = new Date();
+    this.isActive = this.activeDuration.endDate >= currentDate;
+  }
+  next();
+});
 jobDescriptionSchema.pre("remove", async function (next) {
   if (this.file?.publicId) {
     const { deleteFromCloudinary } = await import(

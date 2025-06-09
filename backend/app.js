@@ -8,6 +8,7 @@ import candidateRoutes from "./routes/candidate.route.js";
 import dotenv from 'dotenv';
 import { verifyJWT } from './middlewares/auth.middleware.js';
 import testRoutes from "./routes/test.route.js";
+import { initializeCronJobs } from './schedulers/updateJobStatus.js';
 import { cvWorker } from './Queue/cv/worker.js';
 import { worker } from './Queue/jd/ocrWorker.js';
 dotenv.config();
@@ -22,7 +23,7 @@ app.use(express.json({ limit: "1024kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16Kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
-
+initializeCronJobs();
 connectDB();
 
 app.use("/api/user", userRoutes);

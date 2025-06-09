@@ -126,6 +126,9 @@ const CreateJobFormPage = () => {
 
     formData.append("title", values.title);
     formData.append("jobType", values.jobType);
+    formData.append("jobLocation", values.jobLocation);
+    formData.append("startDate", values.startDate);
+    formData.append("endDate", values.endDate);
     formData.append("employmentType", values.employmentType);
     formData.append("description", values.description || "");
     formData.append("modules[automatedTesting]", values.automatedTesting);
@@ -277,79 +280,105 @@ const CreateJobFormPage = () => {
                       </Form.Item>
                     </Col>
                   </Row>
-                  <Row gutter={16}>
-                    <Col span={24}>
-                      <Form.Item
-                        label="Location"
-                        name="location"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please enter the location",
-                          },
-                        ]}
-                      >
-                        <Input
-                          placeholder="Enter the location"
-                          size="large"
-                          style={{ borderRadius: "6px" }}
-                        />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                  <Row gutter={16}>
-                    <Col span={24}>
-                      <Form.Item
-                        label="JobType"
-                        name="jobType"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please input the job title!",
-                          },
-                        ]}
-                      >
-                        <Select
-                          placeholder="Please select Job Type"
-                          style={{ width: "100%" }}
-                          allowClear
-                        >
-                          {jobTypeOptions.map((option) => (
-                            <Option key={option.value} value={option.value}>
-                              {option.label}
-                            </Option>
-                          ))}
-                        </Select>
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                  <Row gutter={16}>
-                    <Col span={24}>
-                      <Form.Item
-                        label="EmploymentType"
-                        name="EmploymentType"
-                        rules={[
-                          {
-                            required: true,
-                            message:
-                              "Please input the Employment type for the job!",
-                          },
-                        ]}
-                      >
-                        <Select
-                          placeholder="Please select Employment Type"
-                          style={{ width: "100%" }}
-                          allowClear
-                        >
-                          {employmentTypeOptions.map((option) => (
-                            <Option key={option.value} value={option.value}>
-                              {option.label}
-                            </Option>
-                          ))}
-                        </Select>
-                      </Form.Item>
-                    </Col>
-                  </Row>
+                  <Collapse
+                    defaultActiveKey={["jobPreferences"]}
+                    expandIconPosition="end"
+                    style={{
+                      marginBottom: "16px",
+                      background: token.colorBgContainer,
+                      borderRadius: "8px",
+                      border: `1px solid ${token.colorBorderSecondary}`,
+                    }}
+                  >
+                    <Panel
+                      header={
+                        <Space>
+                          <SettingOutlined />
+                          <Text strong>Job Preferences</Text>
+                        </Space>
+                      }
+                      key="jobPreferences"
+                    >
+                      <Row gutter={16}>
+                        <Col span={24}>
+                          <Form.Item
+                            label="Location"
+                            name="location"
+                            rules={[
+                              {
+                                required: true,
+                                message: "Please enter the location",
+                              },
+                            ]}
+                          >
+                            <Input
+                              placeholder="Enter the location"
+                              size="large"
+                              style={{ borderRadius: "6px" }}
+                            />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                      <Row gutter={16}>
+                        <Col span={24}>
+                          <Form.Item
+                            label="Job Type"
+                            name="jobType"
+                            rules={[
+                              {
+                                required: true,
+                                message: "Please select the job type!",
+                              },
+                            ]}
+                          >
+                            <Select
+                              placeholder="Please select Job Type"
+                              style={{ width: "100%" }}
+                              allowClear
+                            >
+                              {jobTypeOptions.map((option) => (
+                                <Select.Option
+                                  key={option.value}
+                                  value={option.value}
+                                >
+                                  {option.label}
+                                </Select.Option>
+                              ))}
+                            </Select>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                      <Row gutter={16}>
+                        <Col span={24}>
+                          <Form.Item
+                            label="Employment Type"
+                            name="employmentType"
+                            rules={[
+                              {
+                                required: true,
+                                message: "Please select the employment type!",
+                              },
+                            ]}
+                          >
+                            <Select
+                              placeholder="Please select Employment Type"
+                              style={{ width: "100%" }}
+                              allowClear
+                            >
+                              {employmentTypeOptions.map((option) => (
+                                <Select.Option
+                                  key={option.value}
+                                  value={option.value}
+                                >
+                                  {option.label}
+                                </Select.Option>
+                              ))}
+                            </Select>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    </Panel>
+                  </Collapse>
                   <Row gutter={16}>
                     <Col span={12}>
                       <Form.Item
@@ -437,7 +466,6 @@ const CreateJobFormPage = () => {
                       </Form.Item>
                     </Col>
                   </Row>
-
                   <Row gutter={16}>
                     <Col span={24}>
                       <Form.Item
