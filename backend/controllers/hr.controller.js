@@ -44,7 +44,8 @@ export const validateJobSchema = (data) => {
 
 
 export const processJd = async (req, res) => {
-  const { title, modules } = req.body;
+  console.log(req.body)
+  const { title, modules, jobType ,jobLocation,  employmentType} = req.body;
   const { accessToken } = req.cookies;
 
   try {
@@ -67,6 +68,9 @@ export const processJd = async (req, res) => {
     const newJob = await JobDescription.create({
       userId: decoded._id,
       jobTitle: title,
+      jobLocation:jobLocation,
+      jobType:jobType,
+      employmentType:employmentType,
       modules,
       status: 'pending',
       file: {
