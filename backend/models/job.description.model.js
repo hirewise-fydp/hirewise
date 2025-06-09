@@ -12,10 +12,6 @@ const jobDescriptionSchema = new Schema(
       type: String,
       required: true,
     },
-    jobLocation: {
-      type: String,
-      required: true,
-    },
     activeDuration: { startDate: { type: String }, endDate: { type: String } },
     jobType: {
       type: String,
@@ -89,7 +85,7 @@ const jobDescriptionSchema = new Schema(
     },
     isActive: {
       type: Boolean,
-      // default: true
+      default: true
     },
     jobExpired:{
       type: Boolean,

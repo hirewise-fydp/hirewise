@@ -56,12 +56,13 @@ export const processJd = async (req, res) => {
     title,
     modules,
     jobType,
-    jobLocation,
+    Location,
     startDate,
     endDate,
     employmentType,
   } = req.body;
   const { accessToken } = req.cookies;
+  console.log("location job:", Location)
 
   try {
     if (!req.file) throw new ApiError(400, "No file uploaded");
@@ -87,7 +88,7 @@ export const processJd = async (req, res) => {
     const newJob = await JobDescription.create({
       userId: decoded._id,
       jobTitle: title,
-      jobLocation: jobLocation,
+      Location: Location,
       activeDuration: {
         startDate: startDate,
         endDate: endDate,
@@ -101,6 +102,7 @@ export const processJd = async (req, res) => {
         publicId: cloudinaryResult.publicId,
         format: cloudinaryResult.format,
       },
+
     });
 
     await addJobToQueue(cloudinaryResult.url, newJob._id);

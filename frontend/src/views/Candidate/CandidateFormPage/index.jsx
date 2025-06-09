@@ -91,7 +91,7 @@ export default function PublicFormPage() {
                     <Descriptions.Item label="Job Title">
                       {formConfig.job.jobTitle || 'N/A'}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Location">
+                    <Descriptions.Item label="Job Location">
                       {formConfig.job.jobLocation || 'N/A'}
                     </Descriptions.Item>
                     <Descriptions.Item label="Job Type">
@@ -115,7 +115,7 @@ export default function PublicFormPage() {
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          View Job Description ({formConfig.job.file.format.toUpperCase()})
+                          View Job Description ({formConfig.job.file})
                         </Button>
                       ) : (
                         'No file available'

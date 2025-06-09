@@ -126,7 +126,7 @@ const CreateJobFormPage = () => {
 
     formData.append("title", values.title);
     formData.append("jobType", values.jobType);
-    formData.append("jobLocation", values.jobLocation);
+    formData.append("Location", values.location);
     formData.append("startDate", values.startDate);
     formData.append("endDate", values.endDate);
     formData.append("employmentType", values.employmentType);
