@@ -15,13 +15,13 @@ const deadLetterQueue = new Queue('ocrDeadLetterQueue', { connection });
 
 export const worker = new Worker('ocrQueue', async (job) => {
   const { filePath, jobId } = job.data;
-  console.log(`Processing job ${job.id} with filePath: ${filePath}`); // Added logging
+  console.log(`Processing job ${job.id} with filePath: ${filePath}`); 
 
   try {
     const extractedText = await extractTextFromFile(filePath);
-    console.log('Extracted Text:', extractedText); // Added logging
+    console.log('Extracted Text:', extractedText);
     const gptResponse = await generateResponse(SYSTEM_INSTRUCTIONS_JD_PROCESSING, TASK_INSTRUCTIONS_JD_PROCESSING, extractedText);
-    console.log('GPT Response:', gptResponse); // Added logging
+    console.log('GPT Response:', gptResponse);
     
 
     await JobDescription.findByIdAndUpdate(jobId, {

@@ -122,7 +122,7 @@ const CreateJobFormPage = () => {
     const formData = new FormData();
     console.log("values:", values);
 
-    // console.log(formData.get(jobType:String));
+    
 
     formData.append("title", values.title);
     formData.append("jobType", values.jobType);
