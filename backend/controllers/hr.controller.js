@@ -45,7 +45,8 @@ export const validateJobSchema = (data) => {
 
 
 export const processJd = async (req, res) => {
-  const { title, modules } = req.body;
+  console.log(req.body)
+  const { title, modules, jobType ,jobLocation, startDate, endDate,   employmentType, } = req.body;
   const { accessToken } = req.cookies;
 
   try {
@@ -68,6 +69,13 @@ export const processJd = async (req, res) => {
     const newJob = await JobDescription.create({
       userId: decoded._id,
       jobTitle: title,
+      jobLocation:jobLocation,
+      activeDuration:{
+        startDate:startDate,
+        endDate: endDate
+      },
+      jobType:jobType,
+      employmentType:employmentType,
       modules,
       status: 'pending',
       file: {
@@ -274,29 +282,26 @@ export const updateJob = async (req, res) => {
 
     console.log(updateData, 'updateData');
 
-
     if (!id) {
       return res.status(400).json({ message: 'Job ID is required' });
     }
 
-    const job = await JobDescription.findById(id);
-    if (!job) {
+    const updatedJob = await JobDescription.findByIdAndUpdate(id, updateData, {
+      new: true,         
+      runValidators: false 
+    });
+
+    if (!updatedJob) {
       return res.status(404).json({ message: 'Job not found' });
     }
 
-
-    Object.keys(updateData).forEach((key) => {
-      job[key] = updateData[key];
-    });
-
-    await job.save();
-
-    res.status(200).json({ message: 'Job updated successfully', job });
+    res.status(200).json({ message: 'Job updated successfully', job: updatedJob });
   } catch (error) {
     console.error('Error updating job:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
 
 
 
@@ -369,7 +374,10 @@ export const createManualTest = async (req, res) => {
 // Generate AI-based test questions for HR review
 export const generateAITestQuestions = async (req, res) => {
   try {
+    
     const { job, testConfig } = req.body;
+    console.log("job:" , job)
+    console.log("test config:" , testConfig)
     console.log("job value in generate AI test Questions :", job)
 
     // Validate required fields

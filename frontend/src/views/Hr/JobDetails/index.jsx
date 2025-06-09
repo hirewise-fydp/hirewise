@@ -147,7 +147,10 @@ const JobDetails = () => {
                 {jobDetails?.jobTitle}
               </Descriptions.Item>
               <Descriptions.Item label="Location" span={1}>
-                {jobDetails?.location || "Not specified"}
+                {jobDetails?.jobLocation || "Not specified"}
+              </Descriptions.Item>
+              <Descriptions.Item label="Type" span={1}>
+                {jobDetails?.jobType || "Not specified"}
               </Descriptions.Item>
               <Descriptions.Item label="Experience" span={2}>
                 {jobDetails?.qualifications?.experience || "Not specified"}
