@@ -23,13 +23,16 @@ export const accessTest = asyncHandler(async (req, res) => {
 
     const application = await CandidateApplication.findById(decoded.applicationId)
         .populate('job');
+
+        console.log(`Accessing test for application: ${application}`);
+        
     
     if (!application) {
         throw new ApiError(404, "Application not found");
     }
 
-    if (application.status !== "test_invited") {
-        throw new ApiError(403, "Test not available for this application");
+    if (application.status === "test_started") {
+        throw new ApiError(403, "You've already applied for this test once and cannot access it again");
     }
 
     const test = await Test.findOne({ job: application.job._id });
@@ -61,7 +64,7 @@ export const accessTest = asyncHandler(async (req, res) => {
     });
 });
 
-// Submit test answers
+
 export const submitTest = asyncHandler(async (req, res) => {
     const { applicationId, answers } = req.body;
 
@@ -89,7 +92,7 @@ export const submitTest = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Test not found for this job");
     }
 
-    // Validate answers
+    
     const testAnswers = [];
     for (const answer of answers) {
         const { questionNumber, selectedOption } = answer;

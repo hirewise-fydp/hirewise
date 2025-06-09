@@ -11,6 +11,7 @@ import "./index.css";
 import Navbar from "./components/Navbar/Navbar";
 import JobFormBuilder from "./views/Hr/JobFormBuilder/JobFormBuilder";
 import PublicFormPage from "./views/Candidate/CandidateFormPage";
+import TestPage from "./views/Candidate/TestPage/TestPage";
 import CreateJobFormPage from "./views/Hr/CreateJobFormPage/CreateJobFormPage";
 import TestCreationPage from "./views/Hr/TestCreationPage";
 import JobDetails from "./views/Hr/JobDetails";
@@ -35,6 +36,10 @@ const MainLayout = () => {
             </PublicRoute>
           }
         />
+
+        {/* Public Test Route - No authentication required */}
+        <Route path="/test" element={<TestPage />} />
+
 
         {/* Protected Routes (With Navbar) */}
         <Route

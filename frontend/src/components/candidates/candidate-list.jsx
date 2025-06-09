@@ -407,7 +407,9 @@ const CandidateList = ({ jobId, onBack }) => {
           setCandidateDetails(null)
         }}
         onViewCV={(url) => {
-          setCvPreviewUrl(url)
+          console.log("url in candidate list:", url);
+          
+          setCvPreviewUrl(url.url)
           setCvPreviewVisible(true)
         }}
       />
