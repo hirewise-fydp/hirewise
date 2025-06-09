@@ -11,6 +11,7 @@ import testRoutes from "./routes/test.route.js";
 import { initializeCronJobs } from './schedulers/updateJobStatus.js';
 import { cvWorker } from './Queue/cv/worker.js';
 import { worker } from './Queue/jd/ocrWorker.js';
+import { ApiError } from './utils/ApiError.js';
 dotenv.config();
 
 const app = express();
@@ -29,7 +30,27 @@ connectDB();
 app.use("/api/user", userRoutes);
 app.use('/api/v4/hr', verifyJWT, hrRoutes);
 app.use('/api/v4/candidate', candidateRoutes);
-app.use("/api/test", testRoutes);
+app.use("/api/v4/test", testRoutes);
+
+
+app.use((err, req, res, next) => {
+  if (err instanceof ApiError) {
+    return res.status(err.statusCode).json({
+      success: false,
+      message: err.message,
+      errors: err.errors,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    });
+  }
+
+  // For unknown errors
+  return res.status(500).json({
+    success: false,
+    message: "Internal Server Error",
+    errors: [],
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+  });
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
