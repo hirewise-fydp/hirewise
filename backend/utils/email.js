@@ -9,7 +9,7 @@ const {
     EMAIL_USER,
     EMAIL_PASS,
     EMAIL_SERVICE = 'gmail',
-    EMAIL_FROM_NAME = 'Job Application System'
+    EMAIL_FROM_NAME = 'Hirewise'
 } = process.env;
 
 if (!EMAIL_USER || !EMAIL_PASS) {
@@ -91,27 +91,22 @@ export const cvRejectionEmail = async ({ email, candidateName, jobTitle, applica
     });
 };
 
-// Test invitation email (for candidates invited to take a test)
+
 export const sendTestInvitationEmail = async ({ email, candidateName, jobTitle, applicationId, testToken }) => {
     const testLink = `${process.env.FRONTEND_URL}/test?token=${testToken}`;
     const subject = `Test Invitation: ${jobTitle}`;
-    const text = `Dear ${candidateName},\n\nCongratulations! Your application for "${jobTitle}" (Application ID: ${applicationId}) has been selected for the next stage.\n\nPlease use the following token to access your test: ${testToken}\n\nGood luck!`;
+    const text = `Dear ${candidateName},\n\nCongratulations! Your application for "${jobTitle}" (Application ID: ${applicationId}) has been selected for the next stage.\n\nPlease access your test using this link: ${testLink}\n\nThe link is valid for 7 days and can be used only once. Good luck!`;
     const html = `
     <p>Dear ${candidateName},</p>
     <p>Congratulations! Your application for "<strong>${jobTitle}</strong>" (Application ID: ${applicationId}) has been selected for the next stage.</p>
-    <p>Please use the following token to access your test: <strong>${testLink}</strong></p>
-    <p>Good luck!</p>
+    <p>Please access your test using this link: <a href="${testLink}">${testLink}</a></p>
+    <p>The link is valid for 7 days and can be used only once. Good luck!</p>
   `;
 
-    await sendEmail({
-        to: email,
-        subject,
-        text,
-        html,
-    });
+    await sendEmail({ to: email, subject, text, html });
 };
 
-// Application received confirmation (sent after submitting an application)
+
 export const sendApplicationReceivedEmail = async ({ email, candidateName, jobTitle, applicationId }) => {
     const subject = `Application Received: ${jobTitle}`;
     const text = `Dear ${candidateName},\n\nThank you for applying for "${jobTitle}" (Application ID: ${applicationId}).\n\nYour application is being processed, and we will update you on the next steps soon.`;
@@ -129,7 +124,7 @@ export const sendApplicationReceivedEmail = async ({ email, candidateName, jobTi
     });
 };
 
-// Evaluation failure notification (for when candidate evaluation fails)
+
 export const sendEvaluationFailureEmail = async ({ email, candidateName, jobTitle, applicationId, errorMessage }) => {
     const subject = `Application Processing Issue: ${jobTitle}`;
     const text = `Dear ${candidateName},\n\nWe encountered an issue while processing your application for "${jobTitle}" (Application ID: ${applicationId}).\nError: ${errorMessage}\n\nOur team is looking into this, and we will contact you with next steps.`;
@@ -146,4 +141,16 @@ export const sendEvaluationFailureEmail = async ({ email, candidateName, jobTitl
         text,
         html,
     });
+};
+
+export const sendTestCompletionEmail = async ({ email, candidateName, jobTitle, applicationId }) => {
+    const subject = `Test Submitted: ${jobTitle}`;
+    const text = `Dear ${candidateName},\n\nThank you for completing the test for "${jobTitle}" (Application ID: ${applicationId}).\n\nYour responses are being evaluated, and we will update you on the next steps soon.`;
+    const html = `
+    <p>Dear ${candidateName},</p>
+    <p>Thank you for completing the test for "<strong>${jobTitle}</strong>" (Application ID: ${applicationId}).</p>
+    <p>Your responses are being evaluated, and we will update you on the next steps soon.</p>
+  `;
+
+    await sendEmail({ to: email, subject, text, html });
 };
