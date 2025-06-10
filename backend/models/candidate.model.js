@@ -51,7 +51,7 @@ const candidateSchema = new mongoose.Schema({
     }],
     status: {
         type: String,
-        enum: ["cv_processing", "cv_processed", "cv_screened", "test_invited", "test_started", "test_completed", "rejected", "hired", "evaluation_failed", "cv_processing_failed"],
+        enum: ["cv_processing", "cv_processed", "cv_screened", "test_invited", "test_started", "test_completed", "rejected","short_listed", "evaluation_failed", "cv_processing_failed"],
         default: "cv_processing"
     },
     cvScore: {

@@ -124,13 +124,59 @@ export const evaluateTestAnswers = async (applicationId) => {
             { answers: application.testAnswers }
         );
 
-        
+        if (!evaluation || typeof evaluation !== 'object') {
+            throw new Error('Invalid evaluation response format');
+        }
+
+        if (typeof evaluation.testScore !== 'number' || evaluation.testScore < 0 || evaluation.testScore > 100) {
+            throw new Error('Invalid test score in evaluation response');
+        }
+        if (typeof evaluation.feedback !== 'string') {
+            throw new Error('Invalid feedback in evaluation response');
+        }
+
+        // Update application with test results
         application.testScore = evaluation.testScore || 0;
         application.evaluationResults.feedback = evaluation.feedback || '';
+        
+        // Set status based on test score
+        if (evaluation.testScore >= 75) {
+            application.status = 'short_listed';
+        } else {
+            application.status = 'rejected';
+        }
+
         application.markModified('evaluationResults');
         await application.save();
 
         console.log(`Test evaluation completed for application ${applicationId}: Score ${evaluation.testScore}`);
+
+    
+        const jobTitle = application.job?.jobTitle || 'Unknown Job';
+        try {
+            if (evaluation.testScore >= 75) {
+                await sendShortlistEmail({
+                    email: application.candidateEmail,
+                    candidateName: application.candidateName,
+                    jobTitle,
+                    applicationId: application._id.toString(),
+                    testScore: evaluation.testScore
+                });
+                console.log(`Shortlist email sent to ${application.candidateEmail}`);
+            } else {
+                await sendTestRejectionEmail({
+                    email: application.candidateEmail,
+                    candidateName: application.candidateName,
+                    jobTitle,
+                    applicationId: application._id.toString(),
+                    testScore: evaluation.testScore,
+                    feedback: evaluation.feedback
+                });
+                console.log(`Test rejection email sent to ${application.candidateEmail}`);
+            }
+        } catch (emailError) {
+            console.error(`Failed to send email to ${application.candidateEmail}:`, emailError);
+        }
 
     } catch (error) {
         console.error('Test evaluation failed for application', applicationId, error);

@@ -154,3 +154,44 @@ export const sendTestCompletionEmail = async ({ email, candidateName, jobTitle, 
 
     await sendEmail({ to: email, subject, text, html });
 };
+
+
+export const sendShortlistEmail = async ({ email, candidateName, jobTitle, applicationId, testScore }) => {
+    const subject = `Congratulations! You Have Been Shortlisted for ${jobTitle}`;
+    const text = `Dear ${candidateName},\n\nWe are pleased to inform you that you have been shortlisted for "${jobTitle}" (Application ID: ${applicationId}).\n\nYour test score of ${testScore}% has qualified you for the next stage of the hiring process. We will contact you soon with further details.\n\nBest regards,\n${EMAIL_FROM_NAME}`;
+    const html = `
+    <p>Dear ${candidateName},</p>
+    <p>We are pleased to inform you that you have been shortlisted for "<strong>${jobTitle}</strong>" (Application ID: ${applicationId}).</p>
+    <p>Your test score of <strong>${testScore}%</strong> has qualified you for the next stage of the hiring process. We will contact you soon with further details.</p>
+    <p>Best regards,<br>${EMAIL_FROM_NAME}</p>
+  `;
+
+    await sendEmail({
+        to: email,
+        subject,
+        text,
+        html,
+    });
+};
+
+
+export const sendTestRejectionEmail = async ({ email, candidateName, jobTitle, applicationId, testScore, feedback }) => {
+    const subject = `Application Update: ${jobTitle}`;
+    const text = `Dear ${candidateName},\n\nThank you for completing the test for "${jobTitle}" (Application ID: ${applicationId}).\n\nUnfortunately, your test score of ${testScore}% did not meet the required threshold to proceed to the next stage.\n\nFeedback:\n${feedback}\n\nWe appreciate your effort and wish you success in your future endeavors.\n\nBest regards,\n${EMAIL_FROM_NAME}`;
+    const html = `
+    <p>Dear ${candidateName},</p>
+    <p>Thank you for completing the test for "<strong>${jobTitle}</strong>" (Application ID: ${applicationId}).</p>
+    <p>Unfortunately, your test score of <strong>${testScore}%</strong> did not meet the required threshold to proceed to the next stage.</p>
+    <p><strong>Feedback:</strong></p>
+    <p>${feedback}</p>
+    <p>We appreciate your effort and wish you success in your future endeavors.</p>
+    <p>Best regards,<br>${EMAIL_FROM_NAME}</p>
+  `;
+
+    await sendEmail({
+        to: email,
+        subject,
+        text,
+        html,
+    });
+};

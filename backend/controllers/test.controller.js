@@ -114,7 +114,7 @@ export const submitTest = asyncHandler(async (req, res) => {
 
     
     application.testAnswers = testAnswers;
-    application.status = "test_completewd";
+    application.status = "test_completed";
     application.testSubmittedAt = new Date();
     application.testToken = null;
     application.testTokenExpires = null;

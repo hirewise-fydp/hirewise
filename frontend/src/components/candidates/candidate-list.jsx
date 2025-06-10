@@ -49,7 +49,6 @@ const statusOptions = [
   { value: "test_started", label: "Test Started" },
   { value: "test_completed", label: "Test Completed" },
   { value: "rejected", label: "Rejected" },
-  { value: "hired", label: "Hired" },
   { value: "evaluation_failed", label: "Evaluation Failed" },
   { value: "cv_processing_failed", label: "CV Processing Failed" },
 ]
@@ -62,7 +61,6 @@ const statusColors = {
   test_started: "processing",
   test_completed: "info",
   rejected: "error",
-  hired: "success",
   evaluation_failed: "error",
   cv_processing_failed: "error",
 }
@@ -373,9 +371,7 @@ const CandidateList = ({ jobId, onBack }) => {
       case "sendTestInvite":
         message.info(`Send test invitation to ${candidate.candidateName}`)
         break
-      case "markHired":
-        message.info(`Mark ${candidate.candidateName} as hired`)
-        break
+      
       case "markRejected":
         message.info(`Mark ${candidate.candidateName} as rejected`)
         break
@@ -544,11 +540,7 @@ const CandidateList = ({ jobId, onBack }) => {
             icon: <FileTextOutlined />,
             disabled: !record.cvFile,
           },
-          // {
-          //   key: "sendEmail",
-          //   label: "Send Email",
-          //   icon: <MailOutlined />,
-          // },
+          
           {
             type: "divider",
           },
@@ -557,12 +549,6 @@ const CandidateList = ({ jobId, onBack }) => {
             label: "Send Test Invite",
             icon: <ClockCircleOutlined />,
             disabled: record.testSubmittedAt || !jobInfo.hasTest,
-          },
-          {
-            key: "markHired",
-            label: "Mark as Hired",
-            icon: <CheckCircleOutlined />,
-            disabled: record.status === "hired",
           },
           {
             key: "markRejected",
