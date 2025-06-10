@@ -65,6 +65,8 @@ const TestCreationFlow = () => {
     basicQuestions: 2,
     difficultyLevel: "medium",
   })
+  console.log("Test Config:", testConfig);
+  
   const [manualQuestions, setManualQuestions] = useState([])
   const [editingQuestion, setEditingQuestion] = useState(null)
   const [isModalVisible, setIsModalVisible] = useState(false)

@@ -11,6 +11,9 @@ const generateResponse = async (systemInstructions, taskInstructions, inputText)
         { role: 'system', content: fullPrompt },
         { role: 'user', content: formattedInputText },
       ],
+      max_tokens: 4096,
+      temperature: 0.2,
+      
     });
 
     let rawResponse = response.choices[0].message.content;

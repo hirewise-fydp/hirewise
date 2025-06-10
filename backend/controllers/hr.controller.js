@@ -437,6 +437,9 @@ export const generateAITestQuestions = async (req, res) => {
       throw new ApiError(400, "Job and testConfig are required");
     }
 
+    console.log("Test config:", testConfig);
+    
+
     const {
       experience,
       conceptualQuestions,
@@ -467,7 +470,7 @@ export const generateAITestQuestions = async (req, res) => {
     `;
 
     const taskInstructions = `
-      Generate ${conceptualQuestions} conceptual, ${logicalQuestions} logical, and ${basicQuestions} basic questions for the following job:
+      Generate ${conceptualQuestions} conceptual, ${logicalQuestions} logical, and ${basicQuestions} basic questions for the following job i.e total ${conceptualQuestions + logicalQuestions + basicQuestions} questions:
       - Job Title: ${jobData.jobTitle}
       - Job Summary: ${jobData.jobSummary || 'Not provided'}
       - Key Responsibilities: ${jobData.keyResponsibilities?.join(', ') || 'Not provided'}
@@ -478,6 +481,10 @@ export const generateAITestQuestions = async (req, res) => {
       - Custom Parameters: ${jobData.customParameters?.length > 0 ? jobData.customParameters.map(param => `${param.key}: ${param.value}`).join(', ') : 'None'}
       The questions should be suitable for a candidate with ${experience} experience and have a ${difficultyLevel} difficulty level. Ensure questions test relevant skills and knowledge specific to the job's requirements. Return the questions in a JSON array.
     `;
+
+    console.log("System Instructions:", systemInstructions);
+    console.log("Task Instructions:", taskInstructions);
+    
 
     const inputText = { testConfig, jobData };
 
@@ -508,6 +515,8 @@ export const generateAITestQuestions = async (req, res) => {
           .json({ message: "Invalid question format from AI service" });
       }
     }
+    console.log("Generated Questions:", generatedQuestions);
+    
 
     // Return generated questions for HR review
     res.status(200).json({
