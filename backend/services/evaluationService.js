@@ -2,7 +2,7 @@
 import { SYSTEM_INSTRUCTIONS_CV_JD_COMPARISON, TASK_INSTRUCTIONS_CV_JD_COMPARISON } from '../constants.js';
 import { CandidateApplication } from '../models/candidate.model.js';
 import { Test } from '../models/test.model.js';
-import { cvRejectionEmail, sendTestInvitationEmail } from '../utils/email.js';
+import { cvRejectionEmail, sendShortlistEmail, sendTestInvitationEmail, sendTestRejectionEmail } from '../utils/email.js';
 import generateResponse from './gptService.js';
 import { generateTestToken } from './tokenService.js';
 
