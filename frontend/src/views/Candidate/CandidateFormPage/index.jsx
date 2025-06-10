@@ -41,7 +41,7 @@ export default function PublicFormPage() {
 
   const handleSubmit = async (data) => {
     try {
-      console.log('Submitted data:', data); // Debug log
+      console.log('Submitted data:', data); 
       const formData = new FormData();
       Object.keys(data).forEach((key) => {
         if (data[key] instanceof File) {
@@ -91,8 +91,11 @@ export default function PublicFormPage() {
                     <Descriptions.Item label="Job Title">
                       {formConfig.job.jobTitle || 'N/A'}
                     </Descriptions.Item>
+                    <Descriptions.Item label="Job Summary">
+                      {formConfig.job.jobSummary || 'N/A'}
+                    </Descriptions.Item>
                     <Descriptions.Item label="Job Location">
-                      {formConfig.job.jobLocation || 'N/A'}
+                      {formConfig.job.Location || 'N/A'}
                     </Descriptions.Item>
                     <Descriptions.Item label="Job Type">
                       {formConfig.job.jobType || 'N/A'}
@@ -100,6 +103,7 @@ export default function PublicFormPage() {
                     <Descriptions.Item label="Employment Type">
                       {formConfig.job.employmentType || 'N/A'}
                     </Descriptions.Item>
+                    
                     <Descriptions.Item label="Application Period">
                       {formConfig.job.activeDuration?.startDate && formConfig.job.activeDuration?.endDate
                         ? `${new Date(formConfig.job.activeDuration.startDate).toLocaleDateString()} - ${new Date(
@@ -107,7 +111,7 @@ export default function PublicFormPage() {
                           ).toLocaleDateString()}`
                         : 'N/A'}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Job Description">
+                    {/* <Descriptions.Item label="Job Description">
                       {formConfig.job.file?.url ? (
                         <Button
                           type="link"
@@ -120,13 +124,9 @@ export default function PublicFormPage() {
                       ) : (
                         'No file available'
                       )}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Status">
-                      {formConfig.job.status || 'N/A'}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Active">
-                      {formConfig.job.isActive ? 'Yes' : 'No'}
-                    </Descriptions.Item>
+                    </Descriptions.Item> */}
+                   
+                    
                   </Descriptions>
                 ) : (
                   <p>No job details available</p>
