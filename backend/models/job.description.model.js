@@ -12,7 +12,7 @@ const jobDescriptionSchema = new Schema(
       type: String,
       required: true,
     },
-    activeDuration: { startDate: { type: String }, endDate: { type: String } },
+    activeDuration: { startDate: { type: Date }, endDate: { type: Date } },
     jobType: {
       type: String,
       required: true,

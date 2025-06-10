@@ -33,6 +33,8 @@ import relativeTime from "dayjs/plugin/relativeTime"
 import axiosInstance from "../../axios/AxiosInstance"
 import JobsMetrics from "./jobs-metrics"
 import JobsFilters from "./jobs-filters"
+import { useSelector } from "react-redux";
+
 
 dayjs.extend(relativeTime)
 
@@ -58,6 +60,8 @@ export default function JobsList({ onManageJob }) {
   const [showFilters, setShowFilters] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState(null)
+  const { user } = useSelector((state) => state.auth);
+
 
   // Dashboard metrics
   const [metrics, setMetrics] = useState({
@@ -107,7 +111,7 @@ export default function JobsList({ onManageJob }) {
     setError(null)
 
     try {
-      const response = await axiosInstance.get(`/api/v4/hr/findAll`)
+      const response = await axiosInstance.get(`/api/v4/hr/findAll/${user.id}`);
       setJobs(response.data || [])
     } catch (err) {
       setError("Failed to refresh jobs. Please try again.")

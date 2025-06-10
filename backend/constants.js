@@ -20,7 +20,6 @@ Read the given raw job description. Transform the unstructured text into a struc
     experience: String,
     skills: [String]
   },
-  location: String,
   compensation: {
     salaryRange: String,
     benefits: [String]
@@ -34,7 +33,6 @@ Ensure:
 - qualifications.education reflects the required education level.
 - qualifications.experience describes required experience.
 - qualifications.skills is an array of skills mentioned.
-- location specifies the job location.
 - compensation.salaryRange includes any salary details mentioned (if available, otherwise leave empty).
 - compensation.benefits includes an array of benefits (if available, otherwise leave empty).
 - applicationProcess captures how candidates are expected to apply or any application-related notes.

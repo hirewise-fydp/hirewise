@@ -52,7 +52,7 @@ export const validateJobSchema = (data) => {
 
 export const processJd = async (req, res) => {
   console.log('process JD request body', req.body)
-  const { title, modules, jobType ,jobLocation, startDate, endDate,   employmentType, evaluationConfig,customParameters } = req.body;
+  const { title, modules, jobType ,Location, startDate, endDate,   employmentType, evaluationConfig,customParameters } = req.body;
   const { accessToken } = req.cookies;
   console.log("location job:", Location)
 
@@ -102,7 +102,7 @@ export const processJd = async (req, res) => {
     const newJob = await JobDescription.create({
       userId: decoded._id,
       jobTitle: title,
-      Location: Location,
+      location: Location,
       activeDuration: {
         startDate: startDate,
         endDate: endDate,

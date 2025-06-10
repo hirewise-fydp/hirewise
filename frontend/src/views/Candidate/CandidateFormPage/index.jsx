@@ -95,7 +95,7 @@ export default function PublicFormPage() {
                       {formConfig.job.jobSummary || 'N/A'}
                     </Descriptions.Item>
                     <Descriptions.Item label="Job Location">
-                      {formConfig.job.Location || 'N/A'}
+                      {formConfig.job.location.charAt(0).toUpperCase() + formConfig.job.location.slice(1) || 'N/A'}
                     </Descriptions.Item>
                     <Descriptions.Item label="Job Type">
                       {formConfig.job.jobType || 'N/A'}

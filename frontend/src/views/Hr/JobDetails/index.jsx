@@ -83,7 +83,8 @@ const JobDetails = () => {
           <div>
             <Title level={3}>{jobDetails?.jobTitle}</Title>
             <Space>
-              <Tag color="blue">{jobDetails?.location}</Tag>
+              <Tag color="blue">{jobDetails?.location
+}</Tag>
               <Tag color={jobDetails?.isActive ? "green" : "default"}>
                 {jobDetails?.isActive ? "Active" : "Inactive"}
               </Tag>
@@ -147,7 +148,7 @@ const JobDetails = () => {
                 {jobDetails?.jobTitle}
               </Descriptions.Item>
               <Descriptions.Item label="Location" span={1}>
-                {jobDetails?.jobLocation || "Not specified"}
+                {jobDetails?.location.charAt(0).toUpperCase() + jobDetails?.location.slice(1) || "Not specified"}
               </Descriptions.Item>
               <Descriptions.Item label="Type" span={1}>
                 {jobDetails?.jobType || "Not specified"}
