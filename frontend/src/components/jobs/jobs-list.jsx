@@ -25,6 +25,7 @@ import {
   FileTextOutlined,
   TeamOutlined,
   FormOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons"
 import { useNavigate } from "react-router-dom"
 import useJobs from "../../hooks/useJobs"
@@ -33,8 +34,7 @@ import relativeTime from "dayjs/plugin/relativeTime"
 import axiosInstance from "../../axios/AxiosInstance"
 import JobsMetrics from "./jobs-metrics"
 import JobsFilters from "./jobs-filters"
-import { useSelector } from "react-redux";
-
+import { useSelector } from "react-redux"
 
 dayjs.extend(relativeTime)
 
@@ -46,6 +46,19 @@ const statusColors = {
   completed: "green",
   failed: "red",
   retrying: "blue",
+}
+
+// Job type colors
+const jobTypeColors = {
+  onsite: "blue",
+  remote: "green",
+  hybrid: "purple",
+}
+
+// Employment type colors
+const employmentTypeColors = {
+  fullTime: "cyan",
+  partTime: "orange",
 }
 
 export default function JobsList({ onManageJob }) {
@@ -60,8 +73,23 @@ export default function JobsList({ onManageJob }) {
   const [showFilters, setShowFilters] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState(null)
-  const { user } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth)
 
+  // New filter states
+  const [jobTypeFilter, setJobTypeFilter] = useState([])
+  const [employmentTypeFilter, setEmploymentTypeFilter] = useState([])
+  const [locationFilter, setLocationFilter] = useState([])
+  const [activePeriodRange, setActivePeriodRange] = useState(null)
+  const [isActiveFilter, setIsActiveFilter] = useState(undefined)
+  const [jobExpiredFilter, setJobExpiredFilter] = useState(undefined)
+  const [skillsFilter, setSkillsFilter] = useState([])
+  const [educationFilter, setEducationFilter] = useState([])
+  const [experienceFilter, setExperienceFilter] = useState([])
+
+  // Available options for filters (would normally come from API)
+  const [availableSkills, setAvailableSkills] = useState([])
+  const [availableLocations, setAvailableLocations] = useState([])
+  const [availableEducation, setAvailableEducation] = useState([])
 
   // Dashboard metrics
   const [metrics, setMetrics] = useState({
@@ -72,6 +100,23 @@ export default function JobsList({ onManageJob }) {
     failedJobs: 0,
     totalCandidates: 0,
   })
+
+  // Extract unique values for filter options
+  useEffect(() => {
+    if (jobs && jobs.length > 0) {
+      // Extract unique locations
+      const locations = [...new Set(jobs.map((job) => job.location).filter(Boolean))]
+      setAvailableLocations(locations)
+
+      // Extract unique skills
+      const skills = [...new Set(jobs.flatMap((job) => job.qualifications?.skills || []).filter(Boolean))]
+      setAvailableSkills(skills)
+
+      // Extract unique education levels
+      const education = [...new Set(jobs.map((job) => job.qualifications?.education).filter(Boolean))]
+      setAvailableEducation(education)
+    }
+  }, [jobs])
 
   // Calculate metrics when jobs change
   useEffect(() => {
@@ -111,7 +156,7 @@ export default function JobsList({ onManageJob }) {
     setError(null)
 
     try {
-      const response = await axiosInstance.get(`/api/v4/hr/findAll/${user.id}`);
+      const response = await axiosInstance.get(`/api/v4/hr/findAll/${user.id}`)
       setJobs(response.data || [])
     } catch (err) {
       setError("Failed to refresh jobs. Please try again.")
@@ -152,7 +197,8 @@ export default function JobsList({ onManageJob }) {
       filtered = filtered.filter(
         (job) =>
           job.jobTitle.toLowerCase().includes(searchLower) ||
-          (job.location && job.location.toLowerCase().includes(searchLower)),
+          (job.location && job.location.toLowerCase().includes(searchLower)) ||
+          (job.jobSummary && job.jobSummary.toLowerCase().includes(searchLower)),
       )
     }
 
@@ -161,7 +207,82 @@ export default function JobsList({ onManageJob }) {
       filtered = filtered.filter((job) => statusFilter.includes(job.status))
     }
 
-    // Date range filter
+    // Job Type filter
+    if (jobTypeFilter.length > 0) {
+      filtered = filtered.filter((job) => jobTypeFilter.includes(job.jobType))
+    }
+
+    // Employment Type filter
+    if (employmentTypeFilter.length > 0) {
+      filtered = filtered.filter((job) => employmentTypeFilter.includes(job.employmentType))
+    }
+
+    // Location filter
+    if (locationFilter.length > 0) {
+      filtered = filtered.filter((job) => job.location && locationFilter.includes(job.location))
+    }
+
+    // Active status filter
+    if (isActiveFilter !== undefined) {
+      filtered = filtered.filter((job) => job.isActive === isActiveFilter)
+    }
+
+    // Job expired filter
+    if (jobExpiredFilter !== undefined) {
+      filtered = filtered.filter((job) => job.jobExpired === jobExpiredFilter)
+    }
+
+    // Skills filter
+    if (skillsFilter.length > 0) {
+      filtered = filtered.filter((job) => job.qualifications?.skills?.some((skill) => skillsFilter.includes(skill)))
+    }
+
+    // Education filter
+    if (educationFilter.length > 0) {
+      filtered = filtered.filter(
+        (job) => job.qualifications?.education && educationFilter.includes(job.qualifications.education),
+      )
+    }
+
+    // Experience filter
+    if (experienceFilter.length > 0) {
+      // This assumes you have a way to categorize experience levels
+      filtered = filtered.filter((job) => {
+        if (!job.qualifications?.experience) return false
+
+        // Example logic - would need to be adjusted based on your actual data format
+        const exp = job.qualifications.experience.toLowerCase()
+
+        if (
+          experienceFilter.includes("entry") &&
+          (exp.includes("entry") || exp.includes("junior") || exp.includes("0-2"))
+        ) {
+          return true
+        }
+        if (
+          experienceFilter.includes("mid") &&
+          (exp.includes("mid") || exp.includes("intermediate") || exp.includes("2-5"))
+        ) {
+          return true
+        }
+        if (
+          experienceFilter.includes("senior") &&
+          (exp.includes("senior") || exp.includes("5+") || exp.includes("lead"))
+        ) {
+          return true
+        }
+        if (
+          experienceFilter.includes("executive") &&
+          (exp.includes("executive") || exp.includes("director") || exp.includes("head"))
+        ) {
+          return true
+        }
+
+        return false
+      })
+    }
+
+    // Date range filter for creation date
     if (dateRange && dateRange[0] && dateRange[1]) {
       const startDate = dateRange[0].startOf("day")
       const endDate = dateRange[1].endOf("day")
@@ -169,6 +290,29 @@ export default function JobsList({ onManageJob }) {
       filtered = filtered.filter((job) => {
         const createdAt = dayjs(job.createdAt)
         return createdAt.isAfter(startDate) && createdAt.isBefore(endDate)
+      })
+    }
+
+    // Active period filter
+    if (activePeriodRange && activePeriodRange[0] && activePeriodRange[1]) {
+      const startDate = activePeriodRange[0].startOf("day")
+      const endDate = activePeriodRange[1].endOf("day")
+
+      filtered = filtered.filter((job) => {
+        // Check if job has active duration
+        if (!job.activeDuration) return false
+
+        const jobStartDate = job.activeDuration.startDate ? dayjs(job.activeDuration.startDate) : null
+        const jobEndDate = job.activeDuration.endDate ? dayjs(job.activeDuration.endDate) : null
+
+        // If job has no dates, exclude it
+        if (!jobStartDate || !jobEndDate) return false
+
+        // Check if job's active period overlaps with the filter period
+        return (
+          (jobStartDate.isBefore(endDate) || jobStartDate.isSame(endDate)) &&
+          (jobEndDate.isAfter(startDate) || jobEndDate.isSame(startDate))
+        )
       })
     }
 
@@ -180,6 +324,15 @@ export default function JobsList({ onManageJob }) {
     setSearchText("")
     setStatusFilter([])
     setDateRange(null)
+    setJobTypeFilter([])
+    setEmploymentTypeFilter([])
+    setLocationFilter([])
+    setActivePeriodRange(null)
+    setIsActiveFilter(undefined)
+    setJobExpiredFilter(undefined)
+    setSkillsFilter([])
+    setEducationFilter([])
+    setExperienceFilter([])
     setFilteredJobs(jobs)
   }
 
@@ -200,7 +353,26 @@ export default function JobsList({ onManageJob }) {
               <Badge status="default" style={{ marginLeft: 8 }} />
             )}
           </div>
-          <Text type="secondary">{record.location || "No location specified"}</Text>
+          <Space size={4} style={{ marginTop: 4 }}>
+            {record.location && (
+              <Text type="secondary" style={{ fontSize: "12px" }}>
+                {record.location}
+              </Text>
+            )}
+            {record.jobType && (
+              <Tag color={jobTypeColors[record.jobType] || "default"} style={{ fontSize: "10px", padding: "0 4px" }}>
+                {record.jobType}
+              </Tag>
+            )}
+            {record.employmentType && (
+              <Tag
+                color={employmentTypeColors[record.employmentType] || "default"}
+                style={{ fontSize: "10px", padding: "0 4px" }}
+              >
+                {record.employmentType === "fullTime" ? "Full Time" : "Part Time"}
+              </Tag>
+            )}
+          </Space>
         </div>
       ),
     },
@@ -212,6 +384,31 @@ export default function JobsList({ onManageJob }) {
       render: (status) => (
         <Tag color={statusColors[status] || "default"}>{status.charAt(0).toUpperCase() + status.slice(1)}</Tag>
       ),
+    },
+    {
+      title: "Active Period",
+      key: "activePeriod",
+      render: (_, record) => {
+        if (!record.activeDuration?.startDate) return <Text type="secondary">Not set</Text>
+
+        const startDate = dayjs(record.activeDuration.startDate).format("MMM D, YYYY")
+        const endDate = record.activeDuration.endDate
+          ? dayjs(record.activeDuration.endDate).format("MMM D, YYYY")
+          : "Ongoing"
+
+        const isExpired = record.jobExpired
+
+        return (
+          <Tooltip title={`${startDate} to ${endDate}`}>
+            <Space>
+              <CalendarOutlined />
+              <Text type={isExpired ? "danger" : "secondary"} style={{ fontSize: "12px" }}>
+                {isExpired ? "Expired" : `${startDate} - ${endDate}`}
+              </Text>
+            </Space>
+          </Tooltip>
+        )
+      },
     },
     {
       title: "Modules",
@@ -268,7 +465,12 @@ export default function JobsList({ onManageJob }) {
       dataIndex: "isActive",
       key: "isActive",
       render: (isActive, record) => (
-        <Switch checked={isActive} disabled={record.jobExpired} onChange={() => handleToggleActive(record._id, isActive)} size="small" />
+        <Switch
+          checked={isActive}
+          disabled={record.jobExpired}
+          onChange={() => handleToggleActive(record._id, isActive)}
+          size="small"
+        />
       ),
     },
     {
@@ -347,6 +549,27 @@ export default function JobsList({ onManageJob }) {
             setStatusFilter={setStatusFilter}
             dateRange={dateRange}
             setDateRange={setDateRange}
+            jobTypeFilter={jobTypeFilter}
+            setJobTypeFilter={setJobTypeFilter}
+            employmentTypeFilter={employmentTypeFilter}
+            setEmploymentTypeFilter={setEmploymentTypeFilter}
+            locationFilter={locationFilter}
+            setLocationFilter={setLocationFilter}
+            activePeriodRange={activePeriodRange}
+            setActivePeriodRange={setActivePeriodRange}
+            isActiveFilter={isActiveFilter}
+            setIsActiveFilter={setIsActiveFilter}
+            jobExpiredFilter={jobExpiredFilter}
+            setJobExpiredFilter={setJobExpiredFilter}
+            skillsFilter={skillsFilter}
+            setSkillsFilter={setSkillsFilter}
+            educationFilter={educationFilter}
+            setEducationFilter={setEducationFilter}
+            experienceFilter={experienceFilter}
+            setExperienceFilter={setExperienceFilter}
+            availableSkills={availableSkills}
+            availableLocations={availableLocations}
+            availableEducation={availableEducation}
             applyFilters={applyFilters}
             resetFilters={resetFilters}
           />
