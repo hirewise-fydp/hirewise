@@ -86,7 +86,7 @@ const CandidateList = ({ jobId, onBack }) => {
   
   
 
-  // New filter states
+
   const [skillsFilter, setSkillsFilter] = useState([])
   const [educationFilter, setEducationFilter] = useState([])
   const [experienceFilter, setExperienceFilter] = useState([])

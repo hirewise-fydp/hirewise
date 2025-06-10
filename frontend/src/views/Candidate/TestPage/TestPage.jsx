@@ -51,7 +51,7 @@ const TestPage = () => {
     fetchTestData()
   }, [token])
 
-  // Anti-cheating measures
+
   useEffect(() => {
     if (!testStarted || testCompleted) return
 
@@ -168,16 +168,9 @@ const TestPage = () => {
 
   const startTest = () => {
     setTestStarted(true)
-    enterFullscreen()
   }
 
-  const enterFullscreen = () => {
-    if (testContainerRef.current && testContainerRef.current.requestFullscreen) {
-      testContainerRef.current.requestFullscreen().catch((err) => {
-        console.warn("Could not enter fullscreen:", err)
-      })
-    }
-  }
+ 
 
   const showWarning = (message) => {
     Modal.warning({
