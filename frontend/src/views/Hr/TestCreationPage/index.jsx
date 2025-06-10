@@ -38,6 +38,7 @@ import {
 } from "@ant-design/icons"
 import { useParams, useNavigate } from "react-router-dom"
 import axiosInstance from "../../../axios/AxiosInstance"
+import { useWatch } from "antd/es/form/Form"
 
 const { Title, Text, Paragraph } = Typography
 const { Step } = Steps
@@ -72,6 +73,8 @@ const TestCreationFlow = () => {
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [error, setError] = useState(null)
 
+
+  const options = useWatch("options", questionForm) || [];
   // Fetch job details
   useEffect(() => {
     const fetchJobDetails = async () => {
@@ -703,127 +706,128 @@ const TestCreationFlow = () => {
 
       {/* Question Modal */}
       <Modal
-        title={editingQuestion ? "Edit Question" : "Add Question"}
-        open={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        footer={[
-          <Button key="cancel" onClick={() => setIsModalVisible(false)}>
-            Cancel
-          </Button>,
-          <Button key="save" type="primary" onClick={handleSaveQuestion}>
-            Save
-          </Button>,
-        ]}
-        width={700}
+    title={editingQuestion ? "Edit Question" : "Add Question"}
+    open={isModalVisible}
+    onCancel={() => setIsModalVisible(false)}
+    footer={[
+      <Button key="cancel" onClick={() => setIsModalVisible(false)}>
+        Cancel
+      </Button>,
+      <Button key="save" type="primary" onClick={handleSaveQuestion}>
+        Save
+      </Button>,
+    ]}
+    width={700}
+  >
+    <Form form={questionForm} layout="vertical">
+      <Form.Item
+        name="questionText"
+        label="Question"
+        rules={[{ required: true, message: "Please enter the question" }]}
       >
-        <Form form={questionForm} layout="vertical">
-          <Form.Item
-            name="questionText"
-            label="Question"
-            rules={[{ required: true, message: "Please enter the question" }]}
-          >
-            <Input.TextArea rows={4} placeholder="Enter the question text" />
-          </Form.Item>
+        <Input.TextArea rows={4} placeholder="Enter the question text" />
+      </Form.Item>
 
-          <Form.Item
-            name="questionType"
-            label="Question Type"
-            rules={[{ required: true, message: "Please select question type" }]}
-          >
-            <Select placeholder="Select question type">
-              <Option value="conceptual">Conceptual</Option>
-              <Option value="logical">Logical</Option>
-              <Option value="basic">Basic</Option>
-            </Select>
-          </Form.Item>
+      <Form.Item
+        name="questionType"
+        label="Question Type"
+        rules={[{ required: true, message: "Please select question type" }]}
+      >
+        <Select placeholder="Select question type">
+          <Option value="conceptual">Conceptual</Option>
+          <Option value="logical">Logical</Option>
+          <Option value="basic">Basic</Option>
+        </Select>
+      </Form.Item>
 
-          <Form.List
-            name="options"
-            rules={[
-              {
-                validator: async (_, options) => {
-                  if (!options || options.length !== 4) {
-                    return Promise.reject(new Error("Please provide exactly 4 options"))
-                  }
-                },
-              },
-            ]}
-          >
-            {(fields, { add, remove }, { errors }) => (
-              <>
-                {fields.map((field, index) => (
-                  <Form.Item
-                    required={false}
-                    key={field.key}
-                    label={index === 0 ? "Options" : ""}
-                    validateStatus={field.errors ? "error" : ""}
-                    help={field.errors?.join(", ")}
-                  >
-                    <Form.Item
-                      {...field}
-                      validateTrigger={["onChange", "onBlur"]}
-                      rules={[
-                        {
-                          required: true,
-                          whitespace: true,
-                          message: "Please input option content",
-                        },
-                      ]}
-                      noStyle
-                    >
-                      <Input
-                        placeholder={`Option ${index + 1}`}
-                        style={{ width: "90%" }}
-                        addonBefore={`${String.fromCharCode(65 + index)}.`}
-                      />
-                    </Form.Item>
-                    {fields.length > 1 ? (
-                      <DeleteOutlined
-                        className="dynamic-delete-button"
-                        style={{ margin: "0 8px" }}
-                        onClick={() => remove(field.name)}
-                      />
-                    ) : null}
-                  </Form.Item>
-                ))}
-                {fields.length < 4 ? (
-                  <Form.Item>
-                    <Button type="dashed" onClick={() => add()} style={{ width: "60%" }} icon={<PlusOutlined />}>
-                      Add Option
-                    </Button>
-                    <Form.ErrorList errors={errors} />
-                  </Form.Item>
+      <Form.List
+        name="options"
+        rules={[
+          {
+            validator: async (_, options) => {
+              if (!options || options.length !== 4) {
+                return Promise.reject(new Error("Please provide exactly 4 options"));
+              }
+            },
+          },
+        ]}
+      >
+        {(fields, { add, remove }, { errors }) => (
+          <>
+            {fields.map((field, index) => (
+              <Form.Item
+                required={false}
+                key={field.key}
+                label={index === 0 ? "Options" : ""}
+                validateStatus={field.errors ? "error" : ""}
+                help={field.errors?.join(", ")}
+              >
+                <Form.Item
+                  {...field}
+                  validateTrigger={["onChange", "onBlur"]}
+                  rules={[
+                    {
+                      required: true,
+                      whitespace: true,
+                      message: "Please input option content",
+                    },
+                  ]}
+                  noStyle
+                >
+                  <Input
+                    placeholder={`Option ${index + 1}`}
+                    style={{ width: "90%" }}
+                    addonBefore={`${String.fromCharCode(65 + index)}.`}
+                  />
+                </Form.Item>
+                {fields.length > 1 ? (
+                  <DeleteOutlined
+                    className="dynamic-delete-button"
+                    style={{ margin: "0 8px" }}
+                    onClick={() => remove(field.name)}
+                  />
                 ) : null}
-              </>
-            )}
-          </Form.List>
+              </Form.Item>
+            ))}
+            {fields.length < 4 ? (
+              <Form.Item>
+                <Button type="dashed" onClick={() => add()} style={{ width: "60%" }} icon={<PlusOutlined />}>
+                  Add Option
+                </Button>
+                <Form.ErrorList errors={errors} />
+              </Form.Item>
+            ) : null}
+          </>
+        )}
+      </Form.List>
 
-          <Form.Item
-            name="correctAnswer"
-            label="Correct Answer"
-            rules={[
-              { required: true, message: "Please select the correct answer" },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  const options = getFieldValue("options") || []
-                  if (!value || options.includes(value)) {
-                    return Promise.resolve()
-                  }
-                  return Promise.reject(new Error("Correct answer must be one of the options"))
-                },
-              }),
-            ]}
-          >
-            <Select placeholder="Select the correct answer">
-              {questionForm.getFieldValue("options")?.map((option, index) => (
-                <Option key={index} value={option}>
-                  {option}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </Form>
-      </Modal>
+      <Form.Item
+        name="correctAnswer"
+        label="Correct Answer"
+        dependencies={["options"]}
+        rules={[
+          { required: true, message: "Please select the correct answer" },
+          ({ getFieldValue }) => ({
+            validator(_, value) {
+              const formOptions = getFieldValue("options") || [];
+              if (!value || formOptions.includes(value)) {
+                return Promise.resolve();
+              }
+              return Promise.reject(new Error("Correct answer must be one of the options"));
+            },
+          }),
+        ]}
+      >
+        <Select placeholder="Select the correct answer">
+          {options.map((option, index) => ( // Use the options variable
+            <Option key={index} value={option}>
+              {option}
+            </Option>
+          ))}
+        </Select>
+      </Form.Item>
+    </Form>
+  </Modal>
     </div>
   )
 }
