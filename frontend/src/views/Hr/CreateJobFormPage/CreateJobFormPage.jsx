@@ -59,7 +59,7 @@ const CreateJobFormPage = () => {
     { value: "hybrid", label: "Hybrid" },
   ];
   const employmentTypeOptions = [
-    { value: "fulTime", label: "Full Time" },
+    { value: "fullTime", label: "Full Time" },
     { value: "partTime", label: "Part Time" },
   ];
 
