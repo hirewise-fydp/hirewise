@@ -124,16 +124,7 @@ export const submitTest = asyncHandler(async (req, res) => {
     await evaluateTestAnswers(applicationId);
 
     
-    try {
-        await sendTestCompletionEmail({
-            email: application.candidateEmail,
-            candidateName: application.candidateName,
-            jobTitle: application.job.jobTitle,
-            applicationId: application._id.toString()
-        });
-    } catch (emailError) {
-        console.error(`Failed to send test completion email to ${application.candidateEmail}:`, emailError);
-    }
+    
 
     return res.status(200).json({
         success: true,
