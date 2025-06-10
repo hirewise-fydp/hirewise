@@ -470,17 +470,27 @@ export const generateAITestQuestions = async (req, res) => {
     `;
 
     const taskInstructions = `
-      Generate ${conceptualQuestions} conceptual, ${logicalQuestions} logical, and ${basicQuestions} basic questions for the following job i.e total ${conceptualQuestions + logicalQuestions + basicQuestions} questions:
-      - Job Title: ${jobData.jobTitle}
-      - Job Summary: ${jobData.jobSummary || 'Not provided'}
-      - Key Responsibilities: ${jobData.keyResponsibilities?.join(', ') || 'Not provided'}
-      - Qualifications:
-        - Education: ${jobData.qualifications?.education || 'Not provided'}
-        - Experience: ${jobData.qualifications?.experience || 'Not provided'}
-        - Skills: ${jobData.qualifications?.skills?.join(', ') || 'Not provided'}
-      - Custom Parameters: ${jobData.customParameters?.length > 0 ? jobData.customParameters.map(param => `${param.key}: ${param.value}`).join(', ') : 'None'}
-      The questions should be suitable for a candidate with ${experience} experience and have a ${difficultyLevel} difficulty level. Ensure questions test relevant skills and knowledge specific to the job's requirements. Return the questions in a JSON array.
-    `;
+    Generate exactly ${conceptualQuestions + logicalQuestions + basicQuestions} questions for the following job, with the following distribution:
+    - ${conceptualQuestions} conceptual questions
+    - ${logicalQuestions} logical questions
+    - ${basicQuestions} basic questions
+    Job Details:
+    - Job Title: ${jobData.jobTitle}
+    - Job Summary: ${jobData.jobSummary || 'Not provided'}
+    - Key Responsibilities: ${jobData.keyResponsibilities?.join(', ') || 'Not provided'}
+    - Qualifications:
+      - Education: ${jobData.qualifications?.education || 'Not provided'}
+      - Experience: ${jobData.qualifications?.experience || 'Not provided'}
+      - Skills: ${jobData.qualifications?.skills?.join(', ') || 'Not provided'}
+    - Custom Parameters: ${jobData.customParameters?.length > 0 ? jobData.customParameters.map(param => `${param.key}: ${param.value}`).join(', ') : 'None'}
+    Requirements:
+    - The questions must be suitable for a candidate with ${experience} experience and have a ${difficultyLevel} difficulty level.
+    - Questions must test relevant skills and knowledge specific to the job's requirements (e.g., test automation tools like Selenium, Agile processes, bug tracking with JIRA/TestRail).
+    - Return exactly ${conceptualQuestions + logicalQuestions + basicQuestions} questions in a JSON array, with ${conceptualQuestions} marked as "conceptual", ${logicalQuestions} as "logical", and ${basicQuestions} as "basic".
+    - Do not generate fewer or more questions than requested.
+    - Ensure each question is unique and diverse, covering different aspects of the job's requirements (e.g., different tools, processes, or scenarios). Avoid rephrasing or generating questions similar to previously created ones.
+    - Focus on varied question formats, such as scenario-based, tool-specific, process-related, or problem-solving questions, to ensure a broad assessment of the candidate's skills.
+  `;
 
     console.log("System Instructions:", systemInstructions);
     console.log("Task Instructions:", taskInstructions);
@@ -489,10 +499,14 @@ export const generateAITestQuestions = async (req, res) => {
     const inputText = { testConfig, jobData };
 
     // Call GPT service to generate questions
+    const temperature = 0.7;
+    const top_p = 0.8; 
     const generatedQuestions = await generateResponse(
       systemInstructions,
       taskInstructions,
-      inputText
+      inputText,
+      temperature,
+      top_p
     );
 
     // Validate generated questions
@@ -518,7 +532,7 @@ export const generateAITestQuestions = async (req, res) => {
     console.log("Generated Questions:", generatedQuestions);
     
 
-    // Return generated questions for HR review
+    
     res.status(200).json({
       message: "AI-generated questions ready for review",
       job,

@@ -1,5 +1,5 @@
 import openai from "../config/openaiConfig.js";
-const generateResponse = async (systemInstructions, taskInstructions, inputText) => {
+const generateResponse = async (systemInstructions, taskInstructions, inputText, temperature=0.2,top_p=0.1 ) => {
   try {
     const formattedInputText =
       typeof inputText === 'object' ? JSON.stringify(inputText) : inputText;
@@ -12,7 +12,8 @@ const generateResponse = async (systemInstructions, taskInstructions, inputText)
         { role: 'user', content: formattedInputText },
       ],
       max_tokens: 4096,
-      temperature: 0.2,
+      temperature: temperature || 0.2,
+      top_p: top_p || 0.1,
       
     });
 

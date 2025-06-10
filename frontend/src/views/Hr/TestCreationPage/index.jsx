@@ -133,33 +133,51 @@ const TestCreationFlow = () => {
     setCurrentStep(currentStep - 1)
   }
 
+  const handleRegenerateQuestions = async () => {
+    try {
+      setGeneratingQuestions(true);
+      setError(null);
+
+      const response = await axiosInstance.post("/api/v4/hr/tests/ai/generate", {
+        job: jobId,
+        testConfig: testConfig,
+      });
+
+      console.log("Regenerated Questions Response:", response.data); // Debug API response
+      setAiQuestions(response.data.questions || []); // Ensure questions are set, default to empty array if undefined
+      console.log("Updated aiQuestions:", response.data.questions); // Debug state update
+    } catch (err) {
+      setError("Failed to regenerate questions. Please try again.");
+      console.error("Error regenerating AI questions:", err);
+    } finally {
+      setGeneratingQuestions(false);
+    }
+  };
+
   // Generate AI questions
   const generateAIQuestions = async (config) => {
     try {
-      setGeneratingQuestions(true)
-      setError(null)
+      setGeneratingQuestions(true);
+      setError(null);
 
       const response = await axiosInstance.post("/api/v4/hr/tests/ai/generate", {
         job: jobId,
         testConfig: config,
-      })
+      });
 
-      setAiQuestions(response.data.questions)
-      setCurrentStep(currentStep + 1)
+      console.log("Generated Questions Response:", response.data); // Debug API response
+      setAiQuestions(response.data.questions || []); // Ensure questions are set
+      console.log("Set aiQuestions:", response.data.questions); // Debug state update
+      setCurrentStep(currentStep + 1);
     } catch (err) {
-      setError("Failed to generate questions. Please try again.")
-      console.error("Error generating AI questions:", err)
+      setError("Failed to generate questions. Please try again.");
+      console.error("Error generating AI questions:", err);
     } finally {
-      setGeneratingQuestions(false)
+      setGeneratingQuestions(false);
     }
-  }
+  };
 
-  // Regenerate AI questions
-  const handleRegenerateQuestions = () => {
-    generateAIQuestions(testConfig)
-  }
 
-  // Add manual question
   const handleAddQuestion = () => {
     setEditingQuestion(null)
     questionForm.resetFields()
@@ -599,6 +617,14 @@ const TestCreationFlow = () => {
                   style={{ marginBottom: 16 }}
                 />
               )}
+
+              {testType === "ai" && aiQuestions.length === 0 && (
+        <Empty
+          description="No AI-generated questions available. Try regenerating."
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          style={{ margin: "40px 0" }}
+        />
+      )}
 
               <Collapse defaultActiveKey={["1"]} style={{ marginBottom: 16 }}>
                 <Panel header="Test Configuration" key="1">
