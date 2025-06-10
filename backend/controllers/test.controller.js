@@ -112,18 +112,18 @@ export const submitTest = asyncHandler(async (req, res) => {
         });
     }
 
-    // Update application
+    
     application.testAnswers = testAnswers;
-    application.status = "test_completed";
+    application.status = "test_completewd";
     application.testSubmittedAt = new Date();
-    application.testToken = null; // Invalidate token after submission
+    application.testToken = null;
     application.testTokenExpires = null;
     await application.save();
 
-    // Queue test evaluation
+    
     await evaluateTestAnswers(applicationId);
 
-    // Send confirmation email
+    
     try {
         await sendTestCompletionEmail({
             email: application.candidateEmail,

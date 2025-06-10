@@ -10,7 +10,7 @@ export const extractTextFromFile = async (fileUrl, localFilePath = null) => {
     if (fileUrl && fileUrl.includes('cloudinary')) {
       // Send the URL in a JSON payload
       response = await axios.post(
-        'http://192.168.18.188:5001/extract-text',
+        'http://127.0.0.1:5001/extract-text',
         { image_url: fileUrl },
         {
           headers: { 'Content-Type': 'application/json' },
@@ -22,7 +22,7 @@ export const extractTextFromFile = async (fileUrl, localFilePath = null) => {
       const formData = new FormData();
       formData.append('image', fs.createReadStream(localFilePath));
 
-      response = await axios.post('http://127.0.0.1:5001/extract-text', formData, {
+      response = await axios.post('http://192.168.0.105:5001/extract-text', formData, {
         headers: formData.getHeaders(),
         timeout: 30000, // Increased timeout to 30 seconds
       });
@@ -38,6 +38,8 @@ export const extractTextFromFile = async (fileUrl, localFilePath = null) => {
 
     return response.data.text;
   } catch (error) {
+    console.log('Error in extractTextFromFile:', error);
+    
     if (error.code === 'ECONNREFUSED') {
       throw new ApiError(500, 'OCR server is not running. Please start the Flask server.');
     }

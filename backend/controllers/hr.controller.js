@@ -422,22 +422,21 @@ export const createManualTest = async (req, res) => {
   }
 };
 
-// Generate AI-based test questions for HR review
 export const generateAITestQuestions = async (req, res) => {
   try {
     const { job, testConfig } = req.body;
     console.log("job:", job);
     console.log("test config:", testConfig);
-    console.log("job value in generate AI test Questions :", job);
 
-    // Validate required fields
-    if (!job || !testConfig) {
-      return res
-        .status(400)
-        .json({ message: "Job and testConfig are required" });
+    const jobData = await JobDescription.findById(job);
+    if (!jobData) {
+      throw new ApiError(404, "Job not found");
     }
 
-    // Validate testConfig fields
+    if (!job || !testConfig) {
+      throw new ApiError(400, "Job and testConfig are required");
+    }
+
     const {
       experience,
       conceptualQuestions,
@@ -457,24 +456,30 @@ export const generateAITestQuestions = async (req, res) => {
         .json({ message: "All testConfig fields are required" });
     }
 
-    // Prepare GPT prompt
+    // Prepare GPT prompt with job-specific details
     const systemInstructions = `
-      You are an expert in generating test questions for job assessments. Create a set of questions based on the provided job configuration.
-      The response must be a valid JSON array of question objects, each containing:
-      - questionText: The question text
-      - options: An array of 4 possible answers
-      - correctAnswer: The correct answer (must match one of the options)
-      - questionType: One of "conceptual", "logical", or "basic"
-      Ensure the questions match the specified experience level, difficulty, and question type distribution.
+      You are an expert in generating test questions for job assessments. Create a set of questions tailored to the specific job description provided. The questions must align with the job's requirements, responsibilities, and qualifications, ensuring relevance and accuracy. The response must be a valid JSON array of question objects, each containing:
+      - questionText: The question text, directly related to the job's skills, responsibilities, or qualifications.
+      - options: An array of 4 possible answers, with one correct answer.
+      - correctAnswer: The correct answer (must match one of the options exactly).
+      - questionType: One of "conceptual", "logical", or "basic", as specified.
+      Ensure the questions match the specified experience level, difficulty, and question type distribution. Avoid generic questions; they must be specific to the job's context and requirements.
     `;
 
     const taskInstructions = `
-      Generate ${conceptualQuestions} conceptual, ${logicalQuestions} logical, and ${basicQuestions} basic questions.
-      The questions should be suitable for a candidate with ${experience} experience and have a ${difficultyLevel} difficulty level.
-      Return the questions in a JSON array.
+      Generate ${conceptualQuestions} conceptual, ${logicalQuestions} logical, and ${basicQuestions} basic questions for the following job:
+      - Job Title: ${jobData.jobTitle}
+      - Job Summary: ${jobData.jobSummary || 'Not provided'}
+      - Key Responsibilities: ${jobData.keyResponsibilities?.join(', ') || 'Not provided'}
+      - Qualifications:
+        - Education: ${jobData.qualifications?.education || 'Not provided'}
+        - Experience: ${jobData.qualifications?.experience || 'Not provided'}
+        - Skills: ${jobData.qualifications?.skills?.join(', ') || 'Not provided'}
+      - Custom Parameters: ${jobData.customParameters?.length > 0 ? jobData.customParameters.map(param => `${param.key}: ${param.value}`).join(', ') : 'None'}
+      The questions should be suitable for a candidate with ${experience} experience and have a ${difficultyLevel} difficulty level. Ensure questions test relevant skills and knowledge specific to the job's requirements. Return the questions in a JSON array.
     `;
 
-    const inputText = { job, testConfig };
+    const inputText = { testConfig, jobData };
 
     // Call GPT service to generate questions
     const generatedQuestions = await generateResponse(
@@ -513,7 +518,7 @@ export const generateAITestQuestions = async (req, res) => {
     });
   } catch (error) {
     console.error("Error generating AI test questions:", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(error.statusCode || 500).json({ message: error.message || "Internal Server Error" });
   }
 };
 

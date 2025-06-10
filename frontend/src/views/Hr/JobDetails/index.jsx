@@ -148,7 +148,7 @@ const JobDetails = () => {
                 {jobDetails?.jobTitle}
               </Descriptions.Item>
               <Descriptions.Item label="Location" span={1}>
-                {jobDetails?.location.charAt(0).toUpperCase() + jobDetails?.location.slice(1) || "Not specified"}
+                {jobDetails?.location?.charAt(0).toUpperCase() + jobDetails?.location?.slice(1) || "Not specified"}
               </Descriptions.Item>
               <Descriptions.Item label="Type" span={1}>
                 {jobDetails?.jobType || "Not specified"}
