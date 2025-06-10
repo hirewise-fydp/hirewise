@@ -55,12 +55,12 @@ const CreateJobFormPage = () => {
   const { token } = useToken();
   const jobTypeOptions = [
     { value: "Onsite", label: "onsite" },
-    { value: "Remote", label: "Remote" },
-    { value: "Hybrid", label: "Hybrid" },
+    { value: "Remote", label: "remote" },
+    { value: "Hybrid", label: "hybrid" },
   ];
   const employmentTypeOptions = [
-    { value: "FullTime", label: "FullTime" },
-    { value: "PartTime", label: "PartTime" },
+    { value: "Full Time", label: "fullTime" },
+    { value: "Part Time", label: "partTime" },
   ];
 
   // Calculate remaining weightage

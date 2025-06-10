@@ -16,11 +16,13 @@ const jobDescriptionSchema = new Schema(
     jobType: {
       type: String,
       required: true,
+      enum: ["onsite", "remote", "hybrid"],
     },
 
     employmentType: {
       type: String,
       required: true,
+      enum: ["fullTime", "partTime"],
     },
     jobSummary: {
       type: String,
