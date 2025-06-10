@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Card,
   Button,
@@ -13,78 +13,102 @@ import {
   Spin,
   Tabs,
   message, // Import message from antd
-} from "antd"
-import { FormOutlined, UserOutlined, FileTextOutlined, CopyOutlined, WarningOutlined } from "@ant-design/icons"
-import axiosInstance from "../../../axios/AxiosInstance"
+} from "antd";
+import {
+  FormOutlined,
+  UserOutlined,
+  FileTextOutlined,
+  CopyOutlined,
+  WarningOutlined,
+} from "@ant-design/icons";
+import axiosInstance from "../../../axios/AxiosInstance";
 
-const { Title, Text } = Typography
-const { TabPane } = Tabs
+const { Title, Text } = Typography;
+const { TabPane } = Tabs;
 
 const JobDetails = () => {
-  const { jobId } = useParams()
-  const navigate = useNavigate()
-  const [jobDetails, setJobDetails] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { jobId } = useParams();
+  const navigate = useNavigate();
+  const [jobDetails, setJobDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchJobDetails = async () => {
       try {
-        setLoading(true)
-        const response = await axiosInstance.get(`/api/v4/hr/findJd/${jobId}`)
-        console.log("respons is here", response.data)
-        setJobDetails(response.data)
+        setLoading(true);
+        const response = await axiosInstance.get(`/api/v4/hr/findJd/${jobId}`);
+        console.log("respons is here", response.data);
+        setJobDetails(response.data);
       } catch (err) {
-        setError("Failed to load job details")
-        console.error("Error fetching job details:", err)
+        setError("Failed to load job details");
+        console.error("Error fetching job details:", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
     if (jobId) {
-      fetchJobDetails()
+      fetchJobDetails();
     }
-  }, [jobId])
+  }, [jobId]);
 
   const handleCreateTest = () => {
-    navigate(`/jobs/${jobId}/create-test`)
-  }
+    navigate(`/jobs/${jobId}/create-test`);
+  };
 
   const handleCopyFormLink = () => {
-    console.log('form details:' , jobDetails)
-    const formLink = `${window.location.origin}/form/${jobDetails.formId}`
+    if (jobDetails.modules.automatedTesting && !jobDetails?.testCreated) {
+      message.warning(
+        "No test has been created for this job position. Cannot copy form link."
+      );
+      return;
+    }
+    const formLink = `${window.location.origin}/form/${jobDetails.formId}`;
     navigator.clipboard
       .writeText(formLink)
       .then(() => {
-        message.success("Application form link copied to clipboard!")
+        message.success("Application form link copied to clipboard!");
       })
       .catch(() => {
-        message.error("Failed to copy link")
-      })
-  }
+        message.error("Failed to copy link");
+      });
+  };
 
   if (loading) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "400px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "400px",
+        }}
+      >
         <Spin size="large" />
       </div>
-    )
+    );
   }
 
   if (error) {
-    return <Alert message="Error" description={error} type="error" showIcon />
+    return <Alert message="Error" description={error} type="error" showIcon />;
   }
 
   return (
     <div className="job-details">
       <Card>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginBottom: 16,
+          }}
+        >
           <div>
             <Title level={3}>{jobDetails?.jobTitle}</Title>
             <Space>
-              <Tag color="blue">{jobDetails?.location
-}</Tag>
+              <Tag color="blue">{jobDetails?.location}</Tag>
               <Tag color={jobDetails?.isActive ? "green" : "default"}>
                 {jobDetails?.isActive ? "Active" : "Inactive"}
               </Tag>
@@ -95,32 +119,50 @@ const JobDetails = () => {
           </div>
           <Space>
             <Button icon={<CopyOutlined />} onClick={handleCopyFormLink}>
-              Copy Form Link 
+              Copy Form Link
             </Button>
-            {!jobDetails?.testCreated ? (
-              <Button type="primary" icon={<FormOutlined />} onClick={handleCreateTest} size="large">
-                Create Test
-              </Button>
+            {jobDetails.modules.automatedTesting ? (
+              !jobDetails?.testCreated ? (
+                <Button
+                  type="primary"
+                  icon={<FormOutlined />}
+                  onClick={handleCreateTest}
+                  size="large"
+                >
+                  Create Test
+                </Button>
+              ) : (
+                <Button
+                  icon={<FileTextOutlined />}
+                  onClick={() =>
+                    message.info("View test functionality to be implemented")
+                  }
+                >
+                  View Test
+                </Button>
+              )
             ) : (
-              <Button
-                icon={<FileTextOutlined />}
-                onClick={() => message.info("View test functionality to be implemented")}
-              >
-                View Test
-              </Button>
+              <></>
             )}
           </Space>
         </div>
 
-        {!jobDetails?.testCreated && (
+        {jobDetails.modules.automatedTesting && !jobDetails?.testCreated && (
           <Alert
             message={
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <div>
                   <WarningOutlined style={{ marginRight: 8 }} />
                   <span>
-                    No test has been created for this job position. Creating a test will allow you to evaluate
-                    candidates' skills and knowledge.
+                    No test has been created for this job position. Creating a
+                    test will allow you to evaluate candidates' skills and
+                    knowledge.
                   </span>
                 </div>
                 <Button type="primary" size="small" onClick={handleCreateTest}>
@@ -143,12 +185,16 @@ const JobDetails = () => {
             }
             key="details"
           >
-            <Descriptions bordered column={{ xxl: 3, xl: 3, lg: 3, md: 2, sm: 1, xs: 1 }}>
+            <Descriptions
+              bordered
+              column={{ xxl: 3, xl: 3, lg: 3, md: 2, sm: 1, xs: 1 }}
+            >
               <Descriptions.Item label="Job Title" span={3}>
                 {jobDetails?.jobTitle}
               </Descriptions.Item>
               <Descriptions.Item label="Location" span={1}>
-                {jobDetails?.location?.charAt(0).toUpperCase() + jobDetails?.location?.slice(1) || "Not specified"}
+                {jobDetails?.location?.charAt(0).toUpperCase() +
+                  jobDetails?.location?.slice(1) || "Not specified"}
               </Descriptions.Item>
               <Descriptions.Item label="Type" span={1}>
                 {jobDetails?.jobType || "Not specified"}
@@ -169,17 +215,21 @@ const JobDetails = () => {
                       {skill}
                     </Tag>
                   ))}
-                  {(!jobDetails?.qualifications?.skills || jobDetails.qualifications.skills.length === 0) && (
+                  {(!jobDetails?.qualifications?.skills ||
+                    jobDetails.qualifications.skills.length === 0) && (
                     <Text type="secondary">No skills specified</Text>
                   )}
                 </div>
               </Descriptions.Item>
               <Descriptions.Item label="Key Responsibilities" span={3}>
                 <ul style={{ margin: 0, paddingLeft: 20 }}>
-                  {jobDetails?.keyResponsibilities?.map((responsibility, index) => (
-                    <li key={index}>{responsibility}</li>
-                  ))}
-                  {(!jobDetails?.keyResponsibilities || jobDetails.keyResponsibilities.length === 0) && (
+                  {jobDetails?.keyResponsibilities?.map(
+                    (responsibility, index) => (
+                      <li key={index}>{responsibility}</li>
+                    )
+                  )}
+                  {(!jobDetails?.keyResponsibilities ||
+                    jobDetails.keyResponsibilities.length === 0) && (
                     <Text type="secondary">No responsibilities specified</Text>
                   )}
                 </ul>
@@ -189,7 +239,7 @@ const JobDetails = () => {
         </Tabs>
       </Card>
     </div>
-  )
-}
+  );
+};
 
-export default JobDetails
+export default JobDetails;

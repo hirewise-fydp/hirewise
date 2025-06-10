@@ -51,10 +51,20 @@ export const validateJobSchema = (data) => {
 };
 
 export const processJd = async (req, res) => {
-  console.log('process JD request body', req.body)
-  const { title, modules, jobType ,Location, startDate, endDate,   employmentType, evaluationConfig,customParameters } = req.body;
+  console.log("process JD request body", req.body);
+  const {
+    title,
+    modules,
+    jobType,
+    Location,
+    startDate,
+    endDate,
+    employmentType,
+    evaluationConfig,
+    customParameters,
+  } = req.body;
   const { accessToken } = req.cookies;
-  console.log("location job:", Location)
+  console.log("location job:", Location);
 
   try {
     if (!req.file) throw new ApiError(400, "No file uploaded");
@@ -77,7 +87,6 @@ export const processJd = async (req, res) => {
       throw new ApiError(500, "Failed to upload file to Cloudinary");
     }
 
-    
     let parsedEvaluationConfig = {};
     let parsedCustomParameters = [];
     try {
@@ -86,17 +95,20 @@ export const processJd = async (req, res) => {
       }
       if (customParameters) {
         const rawCustomParameters = JSON.parse(customParameters);
-        
-        parsedCustomParameters = rawCustomParameters.map(param => {
-          const [key, value] = Object.entries(param)[0]; 
+
+        parsedCustomParameters = rawCustomParameters.map((param) => {
+          const [key, value] = Object.entries(param)[0];
           if (!key || value === undefined) {
-            throw new Error('Each custom parameter must have a key and value');
+            throw new Error("Each custom parameter must have a key and value");
           }
           return { key, value };
         });
       }
     } catch (error) {
-      throw new ApiError(400, `Invalid JSON format for evaluationConfig or customParameters: ${error.message}`);
+      throw new ApiError(
+        400,
+        `Invalid JSON format for evaluationConfig or customParameters: ${error.message}`
+      );
     }
 
     const newJob = await JobDescription.create({
@@ -438,7 +450,6 @@ export const generateAITestQuestions = async (req, res) => {
     }
 
     console.log("Test config:", testConfig);
-    
 
     const {
       experience,
@@ -470,23 +481,35 @@ export const generateAITestQuestions = async (req, res) => {
     `;
 
     const taskInstructions = `
-    Generate exactly ${conceptualQuestions + logicalQuestions + basicQuestions} questions for the following job, with the following distribution:
+    Generate exactly ${
+      conceptualQuestions + logicalQuestions + basicQuestions
+    } questions for the following job, with the following distribution:
     - ${conceptualQuestions} conceptual questions
     - ${logicalQuestions} logical questions
     - ${basicQuestions} basic questions
     Job Details:
     - Job Title: ${jobData.jobTitle}
-    - Job Summary: ${jobData.jobSummary || 'Not provided'}
-    - Key Responsibilities: ${jobData.keyResponsibilities?.join(', ') || 'Not provided'}
+    - Job Summary: ${jobData.jobSummary || "Not provided"}
+    - Key Responsibilities: ${
+      jobData.keyResponsibilities?.join(", ") || "Not provided"
+    }
     - Qualifications:
-      - Education: ${jobData.qualifications?.education || 'Not provided'}
-      - Experience: ${jobData.qualifications?.experience || 'Not provided'}
-      - Skills: ${jobData.qualifications?.skills?.join(', ') || 'Not provided'}
-    - Custom Parameters: ${jobData.customParameters?.length > 0 ? jobData.customParameters.map(param => `${param.key}: ${param.value}`).join(', ') : 'None'}
+      - Education: ${jobData.qualifications?.education || "Not provided"}
+      - Experience: ${jobData.qualifications?.experience || "Not provided"}
+      - Skills: ${jobData.qualifications?.skills?.join(", ") || "Not provided"}
+    - Custom Parameters: ${
+      jobData.customParameters?.length > 0
+        ? jobData.customParameters
+            .map((param) => `${param.key}: ${param.value}`)
+            .join(", ")
+        : "None"
+    }
     Requirements:
     - The questions must be suitable for a candidate with ${experience} experience and have a ${difficultyLevel} difficulty level.
     - Questions must test relevant skills and knowledge specific to the job's requirements (e.g., test automation tools like Selenium, Agile processes, bug tracking with JIRA/TestRail).
-    - Return exactly ${conceptualQuestions + logicalQuestions + basicQuestions} questions in a JSON array, with ${conceptualQuestions} marked as "conceptual", ${logicalQuestions} as "logical", and ${basicQuestions} as "basic".
+    - Return exactly ${
+      conceptualQuestions + logicalQuestions + basicQuestions
+    } questions in a JSON array, with ${conceptualQuestions} marked as "conceptual", ${logicalQuestions} as "logical", and ${basicQuestions} as "basic".
     - Do not generate fewer or more questions than requested.
     - Ensure each question is unique and diverse, covering different aspects of the job's requirements (e.g., different tools, processes, or scenarios). Avoid rephrasing or generating questions similar to previously created ones.
     - Focus on varied question formats, such as scenario-based, tool-specific, process-related, or problem-solving questions, to ensure a broad assessment of the candidate's skills.
@@ -494,13 +517,12 @@ export const generateAITestQuestions = async (req, res) => {
 
     console.log("System Instructions:", systemInstructions);
     console.log("Task Instructions:", taskInstructions);
-    
 
     const inputText = { testConfig, jobData };
 
     // Call GPT service to generate questions
     const temperature = 0.7;
-    const top_p = 0.8; 
+    const top_p = 0.8;
     const generatedQuestions = await generateResponse(
       systemInstructions,
       taskInstructions,
@@ -530,9 +552,7 @@ export const generateAITestQuestions = async (req, res) => {
       }
     }
     console.log("Generated Questions:", generatedQuestions);
-    
 
-    
     res.status(200).json({
       message: "AI-generated questions ready for review",
       job,
@@ -541,7 +561,9 @@ export const generateAITestQuestions = async (req, res) => {
     });
   } catch (error) {
     console.error("Error generating AI test questions:", error.message);
-    res.status(error.statusCode || 500).json({ message: error.message || "Internal Server Error" });
+    res
+      .status(error.statusCode || 500)
+      .json({ message: error.message || "Internal Server Error" });
   }
 };
 
@@ -621,24 +643,28 @@ export const hasTest = async (req, res) => {
   try {
     const { jobId } = req.params;
 
-    // Validate jobId
+    const job = await JobDescription.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
       return res.status(400).json({ message: "Invalid job ID" });
     }
 
-    // Check if a test exists for the job
     const test = await Test.findOne({ job: jobId });
-
-    if (test) {
+    if (!test) {
       return res.status(200).json({
-        message: "Test found for job",
-        hasTest: true,
-        testId: test._id,
+        message: "No test found for job",
+        testEnabled: job.modules.automatedTesting,
+        hasTest: false,
       });
     } else {
       return res.status(200).json({
-        message: "No test found for job",
-        hasTest: false,
+        message: "Test found for job",
+        testEnabled: job.modules.automatedTesting,
+        hasTest: true,
+        testId: test._id,
       });
     }
   } catch (error) {
