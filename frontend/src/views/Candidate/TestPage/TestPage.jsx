@@ -1,41 +1,58 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import { useSearchParams, useNavigate } from "react-router-dom"
-import { Card, Radio, Button, Typography, Progress, Modal, Alert, Spin, Row, Col, Space, Divider } from "antd"
-import { ClockCircleOutlined, WarningOutlined, CheckCircleOutlined } from "@ant-design/icons"
-import "./styles.css"
-import axiosInstance from "../../../axios/AxiosInstance"
-import { AxiosError } from "axios"
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import {
+  Card,
+  Radio,
+  Button,
+  Typography,
+  Progress,
+  Modal,
+  Alert,
+  Spin,
+  Row,
+  Col,
+  Space,
+  Divider,
+} from "antd";
+import {
+  ClockCircleOutlined,
+  WarningOutlined,
+  CheckCircleOutlined,
+} from "@ant-design/icons";
+import "./styles.css";
+import axiosInstance from "../../../axios/AxiosInstance";
+import { AxiosError } from "axios";
 
-const { Title, Text, Paragraph } = Typography
+const { Title, Text, Paragraph } = Typography;
 
 const TestPage = () => {
-  const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
-  const token = searchParams.get("token")
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const token = searchParams.get("token");
 
   // Test state
-  const [testData, setTestData] = useState(null)
-  const [currentQuestion, setCurrentQuestion] = useState(0)
-  const [answers, setAnswers] = useState({})
-  const [timeLeft, setTimeLeft] = useState(3600) // 1 hour default
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const [testStarted, setTestStarted] = useState(false)
-  const [testCompleted, setTestCompleted] = useState(false)
+  const [testData, setTestData] = useState(null);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [timeLeft, setTimeLeft] = useState(3600); // 1 hour default
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [testStarted, setTestStarted] = useState(false);
+  const [testCompleted, setTestCompleted] = useState(false);
 
   // Anti-cheating state
-  const [violations, setViolations] = useState([])
-  const [tabSwitchCount, setTabSwitchCount] = useState(0)
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const [warningModalVisible, setWarningModalVisible] = useState(false)
-  const [testInvalidated, setTestInvalidated] = useState(false)
+  const [violations, setViolations] = useState([]);
+  const [tabSwitchCount, setTabSwitchCount] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [warningModalVisible, setWarningModalVisible] = useState(false);
+  const [testInvalidated, setTestInvalidated] = useState(false);
 
   // Refs
-  const timerRef = useRef(null)
-  const testContainerRef = useRef(null)
-  const lastActiveTime = useRef(Date.now())
+  const timerRef = useRef(null);
+  const testContainerRef = useRef(null);
+  const lastActiveTime = useRef(Date.now());
 
   // Initialize test
   useEffect(() => {
@@ -43,17 +60,16 @@ const TestPage = () => {
       Modal.error({
         title: "Invalid Access",
         content: "No valid test token provided. Please check your test link.",
-        onOk: () => navigate("/"),
-      })
-      return
+        onOk: () => {},
+      });
+      return;
     }
 
-    fetchTestData()
-  }, [token])
-
+    fetchTestData();
+  }, [token]);
 
   useEffect(() => {
-    if (!testStarted || testCompleted) return
+    if (!testStarted || testCompleted) return;
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
@@ -61,20 +77,20 @@ const TestPage = () => {
           type: "TAB_SWITCH",
           timestamp: new Date().toISOString(),
           description: "Candidate switched away from test tab",
-        }
+        };
 
-        setViolations((prev) => [...prev, violation])
+        setViolations((prev) => [...prev, violation]);
         setTabSwitchCount((prev) => {
-          const newCount = prev + 1
+          const newCount = prev + 1;
           if (newCount >= 3) {
-            invalidateTest("Multiple tab switches detected")
+            invalidateTest("Multiple tab switches detected");
           } else {
-            showWarning(`Warning: Tab switching detected (${newCount}/3)`)
+            showWarning(`Warning: Tab switching detected (${newCount}/3)`);
           }
-          return newCount
-        })
+          return newCount;
+        });
       }
-    }
+    };
 
     const handleKeyDown = (e) => {
       // Prevent common cheating shortcuts
@@ -86,166 +102,179 @@ const TestPage = () => {
         (e.ctrlKey && e.key === "r") ||
         e.key === "F5"
       ) {
-        e.preventDefault()
-        showWarning("Keyboard shortcuts are disabled during the test")
+        e.preventDefault();
+        showWarning("Keyboard shortcuts are disabled during the test");
       }
-    }
+    };
 
     const handleContextMenu = (e) => {
-      e.preventDefault()
-      showWarning("Right-click is disabled during the test")
-    }
+      e.preventDefault();
+      showWarning("Right-click is disabled during the test");
+    };
 
     const handleBeforeUnload = (e) => {
       if (!testCompleted) {
-        e.preventDefault()
-        e.returnValue = "Are you sure you want to leave? Your test progress will be lost."
+        e.preventDefault();
+        e.returnValue =
+          "Are you sure you want to leave? Your test progress will be lost.";
       }
-    }
+    };
 
     // Add event listeners
-    document.addEventListener("visibilitychange", handleVisibilityChange)
-    document.addEventListener("keydown", handleKeyDown)
-    document.addEventListener("contextmenu", handleContextMenu)
-    window.addEventListener("beforeunload", handleBeforeUnload)
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("contextmenu", handleContextMenu);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange)
-      document.removeEventListener("keydown", handleKeyDown)
-      document.removeEventListener("contextmenu", handleContextMenu)
-      window.removeEventListener("beforeunload", handleBeforeUnload)
-    }
-  }, [testStarted, testCompleted])
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("contextmenu", handleContextMenu);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [testStarted, testCompleted]);
 
   // Timer
   useEffect(() => {
-    if (!testStarted || testCompleted) return
+    if (!testStarted || testCompleted) return;
 
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          submitTest(true) // Auto-submit when time runs out
-          return 0
+          submitTest(true); // Auto-submit when time runs out
+          return 0;
         }
-        return prev - 1
-      })
-    }, 1000)
+        return prev - 1;
+      });
+    }, 1000);
 
     return () => {
       if (timerRef.current) {
-        clearInterval(timerRef.current)
+        clearInterval(timerRef.current);
       }
-    }
-  }, [testStarted, testCompleted])
+    };
+  }, [testStarted, testCompleted]);
 
   // Fullscreen handling
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement)
-    }
+      setIsFullscreen(!!document.fullscreenElement);
+    };
 
-    document.addEventListener("fullscreenchange", handleFullscreenChange)
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange)
-  }, [])
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () =>
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
 
   const fetchTestData = async () => {
     try {
-      const response = await axiosInstance.get(`/api/v4/test/access?token=${token}`)
+      const response = await axiosInstance.get(
+        `/api/v4/test/access?token=${token}`
+      );
       console.log("Test data response:", response.data.data);
-      setTestData(response.data.data)
-      setTimeLeft(response.data.data.questions.length * 120) 
-      setLoading(false)
+      setTestData(response.data.data);
+      setTimeLeft(response.data.data.questions.length * 120);
+      setLoading(false);
     } catch (error) {
       console.log("Error accessing test data:", error.response?.data);
-      
+
       Modal.error({
         title: "Test Access Failed",
         content: error.response.data.message,
-        onOk: () => navigate("/"),
-      })
+        onOk: () => {},
+      });
     }
-  }
+  };
 
   const startTest = () => {
-    setTestStarted(true)
-  }
-
- 
+    setTestStarted(true);
+  };
 
   const showWarning = (message) => {
     Modal.warning({
       title: "Test Violation Warning",
       content: message,
       icon: <WarningOutlined style={{ color: "#faad14" }} />,
-    })
-  }
+    });
+  };
 
   const invalidateTest = (reason) => {
-    setTestInvalidated(true)
+    setTestInvalidated(true);
     Modal.error({
       title: "Test Invalidated",
       content: `Your test has been invalidated due to: ${reason}`,
-      onOk: () => navigate("/"),
-    })
-  }
+      onOk: () => navigate("/test-invalidated"),
+    });
+  };
 
   const handleAnswerChange = (questionIndex, value) => {
     setAnswers((prev) => ({
       ...prev,
       [questionIndex]: value,
-    }))
-  }
+    }));
+  };
 
+  const submitTest = async (autoSubmit = false) => {
+    if (testInvalidated) return;
 
-const submitTest = async (autoSubmit = false) => {
-  if (testInvalidated) return
+    setSubmitting(true);
 
-  setSubmitting(true)
+    try {
+      const formattedAnswers = testData.questions.map((question, index) => ({
+        questionNumber: index + 1,
+        selectedOption: answers[index] || "",
+      }));
 
-  try {
-    const formattedAnswers = testData.questions.map((question, index) => ({
-      questionNumber: index + 1,
-      selectedOption: answers[index] || "",
-    }))
+      const response = await axiosInstance.post(
+        "api/v4/test/submit",
+        {
+          applicationId: testData.applicationId,
+          answers: formattedAnswers,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-    const response = await axiosInstance.post("api/v4/test/submit", {
-      applicationId: testData.applicationId,
-      answers: formattedAnswers,
-    }, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+      const data = response.data;
 
-    const data = response.data
+      setTestCompleted(true);
 
-    setTestCompleted(true)
-
-    Modal.success({
-      title: autoSubmit ? "Test Auto-Submitted" : "Test Submitted Successfully",
-      content: "Your test has been submitted successfully. You will be notified of the results via email.",
-      onOk: () => navigate("/"),
-    })
-  } catch (error) {
-    Modal.error({
-      title: "Submission Failed",
-      content: error.response?.data?.message || error.message || "Something went wrong",
-    })
-  } finally {
-    setSubmitting(false)
-  }
-}
+      Modal.success({
+        title: autoSubmit
+          ? "Test Auto-Submitted"
+          : "Test Submitted Successfully",
+        content:
+          "Your test has been submitted successfully. You will be notified of the results via email.",
+        onOk: () => navigate("/test-completed"),
+      });
+    } catch (error) {
+      Modal.error({
+        title: "Submission Failed",
+        content:
+          error.response?.data?.message ||
+          error.message ||
+          "Something went wrong",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const formatTime = (seconds) => {
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    const secs = seconds % 60
-    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
-  }
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
 
   const getAnsweredCount = () => {
-    return Object.keys(answers).length
-  }
+    return Object.keys(answers).length;
+  };
 
   if (loading) {
     return (
@@ -253,7 +282,7 @@ const submitTest = async (autoSubmit = false) => {
         <Spin size="large" />
         <p>Loading your test...</p>
       </div>
-    )
+    );
   }
 
   if (!testStarted) {
@@ -262,7 +291,9 @@ const submitTest = async (autoSubmit = false) => {
         <Card className="instructions-card">
           <div className="instructions-header">
             <Title level={2}>
-              <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
+              <CheckCircleOutlined
+                style={{ color: "#52c41a", marginRight: 8 }}
+              />
               {testData?.jobTitle} - Assessment Test
             </Title>
           </div>
@@ -275,7 +306,9 @@ const submitTest = async (autoSubmit = false) => {
                 <Card size="small" className="info-card">
                   <Text strong>Total Questions</Text>
                   <br />
-                  <Text className="info-value">{testData?.questions.length}</Text>
+                  <Text className="info-value">
+                    {testData?.questions.length}
+                  </Text>
                 </Card>
               </Col>
               <Col span={12}>
@@ -293,10 +326,15 @@ const submitTest = async (autoSubmit = false) => {
             description={
               <ul className="instructions-list">
                 <li>This test must be completed in one session</li>
-                <li>Do not switch tabs, minimize window, or leave the test page</li>
+                <li>
+                  Do not switch tabs, minimize window, or leave the test page
+                </li>
                 <li>Right-click and keyboard shortcuts are disabled</li>
                 <li>The test will run in fullscreen mode</li>
-                <li>You have {Math.floor(timeLeft / 60)} minutes to complete all questions</li>
+                <li>
+                  You have {Math.floor(timeLeft / 60)} minutes to complete all
+                  questions
+                </li>
                 <li>Your progress is automatically saved</li>
                 <li>Maximum 3 tab switches allowed before test invalidation</li>
               </ul>
@@ -307,13 +345,18 @@ const submitTest = async (autoSubmit = false) => {
           />
 
           <div className="start-button-container">
-            <Button type="primary" size="large" onClick={startTest} icon={<ClockCircleOutlined />}>
+            <Button
+              type="primary"
+              size="large"
+              onClick={startTest}
+              icon={<ClockCircleOutlined />}
+            >
               Start Test
             </Button>
           </div>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
@@ -329,15 +372,25 @@ const submitTest = async (autoSubmit = false) => {
           <Col>
             <Space size="large">
               <div className="timer">
-                <ClockCircleOutlined style={{ color: timeLeft < 300 ? "#ff4d4f" : "#1890ff" }} />
-                <Text strong style={{ color: timeLeft < 300 ? "#ff4d4f" : "#1890ff", marginLeft: 8 }}>
+                <ClockCircleOutlined
+                  style={{ color: timeLeft < 300 ? "#ff4d4f" : "#1890ff" }}
+                />
+                <Text
+                  strong
+                  style={{
+                    color: timeLeft < 300 ? "#ff4d4f" : "#1890ff",
+                    marginLeft: 8,
+                  }}
+                >
                   {formatTime(timeLeft)}
                 </Text>
               </div>
               {tabSwitchCount > 0 && (
                 <div className="violation-count">
                   <WarningOutlined style={{ color: "#faad14" }} />
-                  <Text style={{ color: "#faad14", marginLeft: 4 }}>Warnings: {tabSwitchCount}/3</Text>
+                  <Text style={{ color: "#faad14", marginLeft: 4 }}>
+                    Warnings: {tabSwitchCount}/3
+                  </Text>
                 </div>
               )}
             </Space>
@@ -348,9 +401,13 @@ const submitTest = async (autoSubmit = false) => {
       {/* Progress Bar */}
       <div className="progress-section">
         <Progress
-          percent={Math.round((getAnsweredCount() / testData.questions.length) * 100)}
+          percent={Math.round(
+            (getAnsweredCount() / testData.questions.length) * 100
+          )}
           status={timeLeft < 300 ? "exception" : "active"}
-          format={() => `${getAnsweredCount()}/${testData.questions.length} Answered`}
+          format={() =>
+            `${getAnsweredCount()}/${testData.questions.length} Answered`
+          }
         />
       </div>
 
@@ -361,7 +418,13 @@ const submitTest = async (autoSubmit = false) => {
             <Button
               key={index}
               size="small"
-              type={currentQuestion === index ? "primary" : answers[index] ? "default" : "dashed"}
+              type={
+                currentQuestion === index
+                  ? "primary"
+                  : answers[index]
+                  ? "default"
+                  : "dashed"
+              }
               onClick={() => setCurrentQuestion(index)}
               className={answers[index] ? "answered" : ""}
             >
@@ -382,7 +445,9 @@ const submitTest = async (autoSubmit = false) => {
           </Text>
         </div>
 
-        <Paragraph className="question-text">{testData.questions[currentQuestion]?.questionText}</Paragraph>
+        <Paragraph className="question-text">
+          {testData.questions[currentQuestion]?.questionText}
+        </Paragraph>
 
         <Radio.Group
           value={answers[currentQuestion]}
@@ -390,11 +455,13 @@ const submitTest = async (autoSubmit = false) => {
           className="options-group"
         >
           <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-            {testData.questions[currentQuestion]?.options.map((option, index) => (
-              <Radio key={index} value={option} className="option-radio">
-                <Text>{option}</Text>
-              </Radio>
-            ))}
+            {testData.questions[currentQuestion]?.options.map(
+              (option, index) => (
+                <Radio key={index} value={option} className="option-radio">
+                  <Text>{option}</Text>
+                </Radio>
+              )
+            )}
           </Space>
         </Radio.Group>
       </Card>
@@ -402,12 +469,18 @@ const submitTest = async (autoSubmit = false) => {
       {/* Navigation Buttons */}
       <div className="navigation-buttons">
         <Space>
-          <Button disabled={currentQuestion === 0} onClick={() => setCurrentQuestion((prev) => prev - 1)}>
+          <Button
+            disabled={currentQuestion === 0 || submitting}
+            onClick={() => setCurrentQuestion((prev) => prev - 1)}
+          >
             Previous
           </Button>
 
           {currentQuestion < testData.questions.length - 1 ? (
-            <Button type="primary" onClick={() => setCurrentQuestion((prev) => prev + 1)}>
+            <Button
+              type="primary"
+              onClick={() => setCurrentQuestion((prev) => prev + 1)}
+            >
               Next
             </Button>
           ) : (
@@ -415,13 +488,7 @@ const submitTest = async (autoSubmit = false) => {
               type="primary"
               danger
               loading={submitting}
-              onClick={() => {
-                Modal.confirm({
-                  title: "Submit Test",
-                  content: `You have answered ${getAnsweredCount()} out of ${testData.questions.length} questions. Are you sure you want to submit?`,
-                  onOk: () => submitTest(),
-                })
-              }}
+              onClick={submitTest}
               icon={<CheckCircleOutlined />}
             >
               Submit Test
@@ -442,7 +509,9 @@ const submitTest = async (autoSubmit = false) => {
             </div>
             <div>
               <Text strong>Time Left: </Text>
-              <Text style={{ color: timeLeft < 300 ? "#ff4d4f" : "inherit" }}>{formatTime(timeLeft)}</Text>
+              <Text style={{ color: timeLeft < 300 ? "#ff4d4f" : "inherit" }}>
+                {formatTime(timeLeft)}
+              </Text>
             </div>
             <div>
               <Text strong>Current: </Text>
@@ -452,7 +521,7 @@ const submitTest = async (autoSubmit = false) => {
         </Card>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default TestPage
+export default TestPage;

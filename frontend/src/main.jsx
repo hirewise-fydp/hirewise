@@ -1,6 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
 import App from "./App";
@@ -15,19 +21,29 @@ import TestPage from "./views/Candidate/TestPage/TestPage";
 import CreateJobFormPage from "./views/Hr/CreateJobFormPage/CreateJobFormPage";
 import TestCreationPage from "./views/Hr/TestCreationPage";
 import JobDetails from "./views/Hr/JobDetails";
-
+import TestCompletionPage from "./views/Candidate/TestCompletionPage/TestCompletionPage";
+import TestInvalidatedPage from "./views/Candidate/TestInvalidatedPage/TestInvalidatedPage";
 import DashboardLayout from "./layouts/dashboard-layout";
-import JobsScreen from './views/Hr/jobs-screen'
-import ApplicantsScreen from "./views/Hr/applicants-screen"
+import JobsScreen from "./views/Hr/jobs-screen";
+import ApplicantsScreen from "./views/Hr/applicants-screen";
+import PublicFormCompletion from "./views/Candidate/PublicFormCompletion/PublicFormCompletion";
 const MainLayout = () => {
   const location = useLocation();
-  const hideNavbarRoutes = ["/", "/form/:formId"];
+  const hideNavbarRoutes = [
+    "/",
+    "/form/:formId",
+    "/test",
+    "/test-completed",
+    "/test-invalidated",
+    "/applied",
+  ];
 
   return (
     <>
-      {!hideNavbarRoutes.some(route => 
-        route === location.pathname || 
-        (route.includes(":formId") && location.pathname.startsWith("/form/"))
+      {!hideNavbarRoutes.some(
+        (route) =>
+          route === location.pathname ||
+          (route.includes(":formId") && location.pathname.startsWith("/form/"))
       ) && <Navbar />}
       <Routes>
         {/* Public Route (Only accessible if not logged in) */}
@@ -42,7 +58,9 @@ const MainLayout = () => {
 
         {/* Public Test Route - No authentication required */}
         <Route path="/test" element={<TestPage />} />
-
+        <Route path="/test-completed" element={<TestCompletionPage />} />
+        <Route path="/test-invalidated" element={<TestInvalidatedPage />} />
+        <Route path="/applied" element={<PublicFormCompletion />} />
 
         {/* Protected Routes (With Navbar) */}
         <Route
@@ -92,7 +110,14 @@ const MainLayout = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/create-test" element={<ProtectedRoute><TestCreationPage /></ProtectedRoute>} />
+        <Route
+          path="/create-test"
+          element={
+            <ProtectedRoute>
+              <TestCreationPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/test-data-module-two-form"
           element={

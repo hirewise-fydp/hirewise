@@ -1,0 +1,250 @@
+.completion-container {
+  min-height: 100vh;
+  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.completion-content {
+  width: 100%;
+  max-width: 800px;
+  z-index: 10;
+  position: relative;
+}
+
+.completion-card {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+.completion-details {
+  margin: 24px 0;
+}
+
+.info-section {
+  background: linear-gradient(135deg, #e6f7ff 0%, #f0f9ff 100%);
+  border: 1px solid #91d5ff;
+  border-radius: 8px;
+}
+
+.info-item {
+  padding: 8px 0;
+}
+
+.next-steps-section {
+  background: linear-gradient(135deg, #f6ffed 0%, #fcffe6 100%);
+  border: 1px solid #b7eb8f;
+  border-radius: 8px;
+}
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.step-number {
+  width: 32px;
+  height: 32px;
+  background: #52c41a;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.step-content {
+  flex: 1;
+}
+
+.notes-section {
+  background: linear-gradient(135deg, #fff7e6 0%, #fffbe6 100%);
+  border: 1px solid #ffd591;
+  border-radius: 8px;
+}
+
+.notes-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.notes-list li {
+  margin: 8px 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.contact-section {
+  background: linear-gradient(135deg, #f9f0ff 0%, #efdbff 100%);
+  border: 1px solid #d3adf7;
+  border-radius: 8px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.completion-footer {
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* Background decoration */
+.background-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.decoration-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  animation: float 6s ease-in-out infinite;
+}
+
+.circle-1 {
+  width: 200px;
+  height: 200px;
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.circle-2 {
+  width: 150px;
+  height: 150px;
+  top: 60%;
+  right: 15%;
+  animation-delay: 2s;
+}
+
+.circle-3 {
+  width: 100px;
+  height: 100px;
+  bottom: 20%;
+  left: 20%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(-20px) rotate(180deg);
+    opacity: 0.3;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .completion-container {
+    padding: 16px;
+  }
+
+  .completion-card {
+    margin: 0;
+  }
+
+  .step-item {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .step-number {
+    align-self: flex-start;
+  }
+
+  .decoration-circle {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .completion-content {
+    max-width: 100%;
+  }
+
+  .info-item {
+    text-align: left;
+  }
+
+  .completion-footer {
+    padding: 16px 0;
+  }
+
+  .completion-footer .ant-btn {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+  }
+}
+
+/* Print styles */
+@media print {
+  .completion-container {
+    background: white;
+    padding: 0;
+  }
+
+  .completion-card {
+    box-shadow: none;
+    background: white;
+  }
+
+  .background-decoration {
+    display: none;
+  }
+
+  .completion-footer .ant-btn {
+    display: none;
+  }
+}
+
+/* Disable text selection */
+.completion-container {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Custom scrollbar */
+.completion-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.completion-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.completion-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.completion-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
