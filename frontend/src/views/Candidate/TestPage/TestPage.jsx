@@ -198,13 +198,14 @@ const TestPage = () => {
     });
   };
 
-  const invalidateTest = (reason) => {
+  const invalidateTest = async (reason) => {
     setTestInvalidated(true);
     Modal.error({
       title: "Test Invalidated",
       content: `Your test has been invalidated due to: ${reason}`,
       onOk: () => navigate("/test-invalidated"),
     });
+    await axiosInstance.get(`/api/v4/test/invalidate_test?token=${token}`);
   };
 
   const handleAnswerChange = (questionIndex, value) => {

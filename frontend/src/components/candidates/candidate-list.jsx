@@ -46,6 +46,7 @@ const statusOptions = [
   { value: "cv_processed", label: "CV Processed" },
   { value: "cv_screened", label: "CV Screened" },
   { value: "test_invited", label: "Test Invited" },
+  { value: "test_invalidated", label: "Test Invalidated" },
   { value: "test_started", label: "Test Started" },
   { value: "test_completed", label: "Test Completed" },
   { value: "short_listed", label: "Short Listed" },
@@ -59,6 +60,7 @@ const statusColors = {
   cv_processed: "default",
   cv_screened: "default",
   test_invited: "warning",
+  test_invalidated: "error",
   test_started: "processing",
   test_completed: "info",
   short_listed: "success",
@@ -619,21 +621,21 @@ const CandidateList = ({ jobId, onBack }) => {
             disabled: !record.cvFile,
           },
 
-          {
-            type: "divider",
-          },
-          {
-            key: "sendTestInvite",
-            label: "Send Test Invite",
-            icon: <ClockCircleOutlined />,
-            disabled: record.testSubmittedAt || !jobInfo.hasTest,
-          },
-          {
-            key: "markRejected",
-            label: "Mark as Rejected",
-            icon: <ExclamationCircleOutlined />,
-            disabled: record.status === "rejected",
-          },
+          // {
+          //   type: "divider",
+          // },
+          // {
+          //   key: "sendTestInvite",
+          //   label: "Send Test Invite",
+          //   icon: <ClockCircleOutlined />,
+          //   disabled: record.testSubmittedAt || !jobInfo.hasTest,
+          // },
+          // {
+          //   key: "markRejected",
+          //   label: "Mark as Rejected",
+          //   icon: <ExclamationCircleOutlined />,
+          //   disabled: record.status === "rejected",
+          // },
         ];
 
         return (
