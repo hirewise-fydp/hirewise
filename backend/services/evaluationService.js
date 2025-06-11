@@ -42,11 +42,15 @@ export const evaluateCandidate = async (applicationId) => {
       overallScore: evaluationResults.overallScore || 0,
     };
     if (application.cvScore >= 75) {
-      application.status = "test_invited";
-      application.testToken = generateTestToken(application._id);
-      application.testTokenExpires = new Date(
-        Date.now() + 7 * 24 * 60 * 60 * 1000
-      );
+      if (application.job?.modules.automatedTesting) {
+        application.status = "test_invited";
+        application.testToken = generateTestToken(application._id);
+        application.testTokenExpires = new Date(
+          Date.now() + 7 * 24 * 60 * 60 * 1000
+        );
+      } else {
+        application.status = "short_listed";
+      }
     } else {
       application.status = "rejected";
     }
@@ -75,6 +79,37 @@ export const evaluateCandidate = async (applicationId) => {
         );
       }
     } else if (application.status === "rejected") {
+      try {
+        await cvRejectionEmail({
+          email: application.candidateEmail,
+          candidateName: application.candidateName,
+          jobTitle,
+          applicationId: application._id.toString(),
+          reason: "Your CV score did not meet the required threshold.",
+        });
+        console.log(`Rejection email sent to ${application.candidateEmail}`);
+      } catch (emailError) {
+        console.error(
+          `Failed to send rejection email to ${application.candidateEmail}:`,
+          emailError
+        );
+      }
+    } else if (application.status === "short_listed") {
+      try {
+        await sendShortlistEmail({
+          email: application.candidateEmail,
+          candidateName: application.candidateName,
+          jobTitle,
+          applicationId: application._id.toString(),
+          testScore: application.cvScore,
+        });
+        console.log(`Shortlist email sent to ${application.candidateEmail}`);
+      } catch (emailError) {
+        console.error(
+          `Failed to send shortlist email to ${application.candidateEmail}:`,
+          emailError
+        );
+      }
       try {
         await cvRejectionEmail({
           email: application.candidateEmail,
