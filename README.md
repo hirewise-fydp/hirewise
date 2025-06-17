@@ -17,12 +17,14 @@ This is a full-stack project built with **React (Frontend)**, **Node.js/Express 
 ---
 
 ## 📁 Project Structure
+
+```plaintext
 project-root/
 │
-├── frontend/ # React frontend
-├── backend/ # Node.js backend
-└── python/ # Python service
-
+├── frontend/        # React frontend
+├── backend/         # Node.js backend
+└── python/          # Python service
+```
 
 
 ---
