@@ -34,7 +34,7 @@ project-root/
 ### 1. Clone the Repository
 
 ```bash
-git clone <>
+git clone <https://github.com/hirewise-fydp/hirewise>
 
 ## 🧪 Frontend Setup
 cd frontend
